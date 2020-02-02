@@ -70,7 +70,7 @@ public class CubeManager : MonoBehaviour
         }
 
         if (Input.GetKeyDown(KeyCode.R)) {
-            RotateDepth(xSize, new Vector3(0, 0, 1));
+            RotateDepth(xSize, Vector3.forward);
         }
 
         // To test basic undo easely on editor mode.
@@ -129,7 +129,7 @@ public class CubeManager : MonoBehaviour
             // We round them to int because of floating precision issue.
             int miniCubeDepth = Mathf.RoundToInt(miniCube.transform.position.z);
 
-            // Getting all the cubes from the same row
+            // Getting all the cubes from the same depth
             if (miniCubeDepth == z) {
                 Debug.Log("Depth " + miniCubeDepth);
                 miniCube.xyz = new Vector3Int(miniCube.xyz.x, miniCube.xyz.y, miniCubeDepth);
@@ -140,7 +140,6 @@ public class CubeManager : MonoBehaviour
         // TODO use the direction and not send a hardcoded vector.
         _RotateParentCube(miniCubeDown, direction, new Vector3(0, 0, z));
     }
-
 
     private void _RotateParentCube(List<MiniCube> miniCubeRotation, Vector3 direction, Vector3 xyz) {
 
@@ -214,11 +213,11 @@ public class CubeManager : MonoBehaviour
         }
 
         for (int i = 0; i < numberCubes; i++) {
-            Vector3 positionHorizontalParent = Vector3.Lerp(new Vector3(0, 0, i), new Vector3(numberCubes - 1, numberCubes - 1, i), 0.5f);
+            Vector3 positionDepthParent = Vector3.Lerp(new Vector3(0, 0, i), new Vector3(numberCubes - 1, numberCubes - 1, i), 0.5f);
 
             var parentRotation = new GameObject();
             parentRotation.transform.localEulerAngles = Vector3.zero;
-            parentRotation.transform.localPosition = positionHorizontalParent;
+            parentRotation.transform.localPosition = positionDepthParent;
             parentRotation.name = "depth" + i;
             _parentTransform.Add(parentRotation.name, parentRotation.transform);
         }

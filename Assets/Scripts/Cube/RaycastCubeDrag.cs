@@ -42,32 +42,39 @@ public class RaycastCubeDrag : MonoBehaviour
         }
     }
 
+    // Need to be changed, and relative to the camera / position of the cube
     private void _DirectionDrag() {
         if (rotate)
             return;
 
         if ((Input.GetMouseButton(0) || Input.touchCount > 0) && _miniCubeSelected != null) {
-            Vector3 t = MouseOrMobilePosition() - _previousMousePos;
+            Vector3 inputSubstracted = MouseOrMobilePosition() - _previousMousePos;
 
-            if (Mathf.Abs(t.x) > Mathf.Abs(t.y)) {
+            var direction = inputSubstracted - _miniCubeSelected.transform.position;
+
+            // TODO Use the difference between player pos / mouse pos to make the right rotation and not hardcoded like so
+            direction.Normalize();
+
+            if (Mathf.Abs(inputSubstracted.x) > Mathf.Abs(inputSubstracted.y)) {
                 int miniCubeYPos = Mathf.RoundToInt(_miniCubeSelected.transform.position.y);
                 rotate = true;
+
                 if (_previousMousePos.x < MouseOrMobilePosition().x) {
-                    CubeManager.Instance.RotateHorizontal(miniCubeYPos, Vector2.down);
+                    CubeManager.Instance.RotateHorizontal(miniCubeYPos, Vector3.down);
                 }
                 else if (_previousMousePos.x > MouseOrMobilePosition().x) {
-                    CubeManager.Instance.RotateHorizontal(miniCubeYPos, Vector2.up);
+                    CubeManager.Instance.RotateHorizontal(miniCubeYPos, Vector3.up);
                 }
             }
 
-            if (Mathf.Abs(t.x) < Mathf.Abs(t.y)) {
+            if (Mathf.Abs(inputSubstracted.x) < Mathf.Abs(inputSubstracted.y)) {
                 int miniCubeXPos = Mathf.RoundToInt(_miniCubeSelected.transform.position.x);
                 rotate = true;
                 if (_previousMousePos.y < MouseOrMobilePosition().y) {
-                    CubeManager.Instance.RotateVertical(miniCubeXPos, Vector2.right);
+                    CubeManager.Instance.RotateVertical(miniCubeXPos, Vector3.right);
                 }
                 else if (_previousMousePos.y > MouseOrMobilePosition().y) {
-                    CubeManager.Instance.RotateVertical(miniCubeXPos, Vector2.left);
+                    CubeManager.Instance.RotateVertical(miniCubeXPos, Vector3.left);
                 }
             }
 

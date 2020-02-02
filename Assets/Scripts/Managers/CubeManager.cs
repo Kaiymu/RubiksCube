@@ -50,34 +50,35 @@ public class CubeManager : MonoBehaviour
     private void Update() {
         // Just to test basic rotation, the drag code to touch our cubes will replace that
         if (Input.GetKeyDown(KeyCode.A)) {
-            _GetSameHorizontalCubes(ySize);
+            RotateHorizontal(ySize, Vector2.up);
         }
 
         if (Input.GetKeyDown(KeyCode.Z)) {
-            _GetSameVerticalCubes(xSize);
+            RotateVertical(xSize, Vector2.right);
         }
     }
 
     // TODO : Refactor to get one function for horizontal vertical
-    public void _GetSameHorizontalCubes(int y) {
+    public void RotateHorizontal(int y, Vector2 direction) {
         var miniCubeHorizontal = new List<MiniCube>();
 
         for (int i = 0; i < _miniCubes.Count; i++) {
             // We round them to int because of floating precision issue.
             int miniCubeYPos = Mathf.RoundToInt(_miniCubes[i].transform.position.y);
             if (miniCubeYPos == y) {
-                Debug.LogError("Row " + miniCubeYPos);
+                Debug.Log("Row " + miniCubeYPos);
                 miniCube.xyz = new Vector3Int(miniCube.xyz.x, miniCubeYPos, miniCube.xyz.z);
                 miniCubeHorizontal.Add(_miniCubes[i]);
 
             }
         }
 
-        _RotateParentCube(miniCubeHorizontal, false);
+        _RotateParentCube(miniCubeHorizontal, false, direction);
     }
 
+
     // TODO : Refactor to get one function for horizontal vertical
-    public List<MiniCube> _GetSameVerticalCubes(int x) {
+    public void RotateVertical(int x, Vector2 direction) {
         var miniCubeVertical = new List<MiniCube>();
 
         for (int i = 0; i < _miniCubes.Count; i++) {
@@ -87,19 +88,17 @@ public class CubeManager : MonoBehaviour
             
             // Getting all the cubes from the same row
             if (miniCubeXPos == x) {
-                Debug.LogError("Column " + miniCubeXPos);
+                Debug.Log("Column " + miniCubeXPos);
                 miniCube.xyz = new Vector3Int(miniCubeXPos, miniCube.xyz.y, miniCube.xyz.z);
                 miniCubeVertical.Add(_miniCubes[i]);
             }
         }
 
-        _RotateParentCube(miniCubeVertical, true);
-
-        return miniCubeVertical;
+        _RotateParentCube(miniCubeVertical, true, direction);
     }
 
 
-    private void _RotateParentCube(List<MiniCube> miniCubeRotation, bool vertical) {
+    private void _RotateParentCube(List<MiniCube> miniCubeRotation, bool vertical, Vector2 direction) {
 
         Transform parentTransform = null;
 
@@ -115,10 +114,14 @@ public class CubeManager : MonoBehaviour
             }
 
             // We only go one way, but when we'll have our drag direction
-            if (vertical)
-                parentTransform.transform.Rotate(new Vector3(90, 0, 0));
-            else
-                parentTransform.transform.Rotate(new Vector3(0, 90, 0));
+            if (vertical) {
+                var rotatingVector = direction * new Vector3(90, 0, 0);
+                parentTransform.transform.Rotate(rotatingVector);
+            }
+            else {
+                var rotatingVector = direction * new Vector3(0, 90, 0);
+                parentTransform.transform.Rotate(rotatingVector);
+            }
 
             // Unsetting all the parents
             for (int i = 0; i < miniCubeRotation.Count; i++) {

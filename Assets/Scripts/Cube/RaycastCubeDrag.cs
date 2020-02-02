@@ -11,6 +11,7 @@ public class RaycastCubeDrag : MonoBehaviour
 
     // TODO : Refactor with Input.Touch, for now we'll use editor for our test
     // TODO : Create an InputManager to also handle futur camera zoom in / out and movement
+    // TODO : Fix the bug where you rotate the camera and it doesn't s
     private void Update() {
         _RaycastMiniCube();
         _UnselectCube();

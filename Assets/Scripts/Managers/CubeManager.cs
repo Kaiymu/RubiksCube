@@ -68,15 +68,19 @@ public class CubeManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Z)) {
             RotateVertical(xSize, Vector2.right);
         }
-        
+
+        if (Input.GetKeyDown(KeyCode.R)) {
+            RotateZPos(xSize, new Vector3(0, 0, 1));
+        }
+
         // To test basic undo easely on editor mode.
-        if(Input.GetKeyDown(KeyCode.E)) {
+        if (Input.GetKeyDown(KeyCode.E)) {
             _UndoLastRotation();
         }
     }
 
     // TODO : Refactor to get one function for horizontal vertical
-    public void RotateHorizontal(int y, Vector2 direction) {
+    public void RotateHorizontal(int y, Vector3 direction) {
         var miniCubeHorizontal = new List<MiniCube>();
 
         for (int i = 0; i < _miniCubes.Count; i++) {
@@ -91,12 +95,12 @@ public class CubeManager : MonoBehaviour
         }
 
         // TODO use the direction and not send a hardcoded vector.
-        _RotateParentCube(miniCubeHorizontal, direction, new Vector2(0, y));
+        _RotateParentCube(miniCubeHorizontal, direction, new Vector3(0, y, 0));
     }
 
 
     // TODO : Refactor to get one function for horizontal vertical
-    public void RotateVertical(int x, Vector2 direction) {
+    public void RotateVertical(int x, Vector3 direction) {
         var miniCubeVertical = new List<MiniCube>();
 
         for (int i = 0; i < _miniCubes.Count; i++) {
@@ -113,17 +117,48 @@ public class CubeManager : MonoBehaviour
         }
 
         // TODO use the direction and not send a hardcoded vector.
-        _RotateParentCube(miniCubeVertical, direction, new Vector2(x, 0));
+        _RotateParentCube(miniCubeVertical, direction, new Vector3(x, 0, 0));
+    }
+
+    // TODO huge refactor needed to prevent having 3 time the same functions.
+    public void RotateZPos(int z, Vector3 direction) {
+        var miniCubeDown = new List<MiniCube>();
+
+        for (int i = 0; i < _miniCubes.Count; i++) {
+            var miniCube = _miniCubes[i];
+            // We round them to int because of floating precision issue.
+            int miniCubeZPos = Mathf.RoundToInt(miniCube.transform.position.z);
+
+            // Getting all the cubes from the same row
+            if (miniCubeZPos == z) {
+                Debug.Log("Z pos " + miniCubeZPos);
+                miniCube.xyz = new Vector3Int(miniCube.xyz.x, miniCube.xyz.y, miniCubeZPos);
+                miniCubeDown.Add(_miniCubes[i]);
+                Debug.LogError(_miniCubes[i]);
+            }
+        }
+
+        // TODO use the direction and not send a hardcoded vector.
+        _RotateParentCube(miniCubeDown, direction, new Vector3(0, 0, z));
     }
 
 
-    private void _RotateParentCube(List<MiniCube> miniCubeRotation, Vector2 direction, Vector2 yx) {
+    private void _RotateParentCube(List<MiniCube> miniCubeRotation, Vector3 direction, Vector3 yx) {
 
         Transform parentTransform = null;
 
-        bool vertical = Mathf.Abs(direction.x) > 0;
-        string parentName = vertical ? "row" + yx.y : "column" + yx.x;
+        string parentName = "";
+        if (Mathf.Abs(direction.y) > 0) {
+             parentName = "row" + yx.y;
+        }
+        else if (Mathf.Abs(direction.x) > 0) {
+             parentName = "column" + yx.x;
+        }
+        else if (Mathf.Abs(direction.z) > 0) {
+             parentName = "zPos" + yx.z;
+        }
 
+        Debug.LogError(parentName);
         // Getting our parent from our dictionnary
         if (_parentTransform.TryGetValue(parentName, out parentTransform)) {
 
@@ -136,8 +171,9 @@ public class CubeManager : MonoBehaviour
 
             // We only go one way, but when we'll have our drag direction
             // Because direction is either in X or Y, 90 * 0 gives 0 so we only rotate on one side anyway.
-            Vector2 rotationValue;
-            rotationValue = direction * new Vector3(90, 90, 0);
+            Vector3 rotationValue;
+            rotationValue = Vector3.Scale(direction, new Vector3(90, 90, 90));
+            Debug.LogError(direction + " " + rotationValue);
             parentTransform.transform.Rotate(rotationValue);
 
             if(_undo)
@@ -178,6 +214,16 @@ public class CubeManager : MonoBehaviour
             parentRotation.transform.localEulerAngles = Vector3.zero;
             parentRotation.transform.localPosition = positionHorizontalParent;
             parentRotation.name = "row" + i;
+            _parentTransform.Add(parentRotation.name, parentRotation.transform);
+        }
+
+        for (int i = 0; i < numberCubes; i++) {
+            Vector3 positionHorizontalParent = Vector3.Lerp(new Vector3(0, 0, i), new Vector3(numberCubes - 1, numberCubes - 1, i), 0.5f);
+
+            var parentRotation = new GameObject();
+            parentRotation.transform.localEulerAngles = Vector3.zero;
+            parentRotation.transform.localPosition = positionHorizontalParent;
+            parentRotation.name = "zPos" + i;
             _parentTransform.Add(parentRotation.name, parentRotation.transform);
         }
     }

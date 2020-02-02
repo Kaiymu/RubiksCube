@@ -14,7 +14,19 @@ public class CubeManager : MonoBehaviour
 
     private List<MiniCube> _miniCubes = new List<MiniCube>();
 
+    // Parent that gets rotated and get row / column of cubes as children temporarly 
     private Dictionary<string, Transform> _parentTransform = new Dictionary<string, Transform>();
+
+    // TODO might move all the rotation to an other file for more clarity
+    // Undo rotation
+    private Stack<UndoRotation> _undoRotation = new Stack<UndoRotation>();
+    private bool _undo = true;
+
+    private class UndoRotation
+    {
+        public Vector2 direction = Vector3.zero;
+        public Vector2 columnRow = new Vector2(-1, -1);
+    }
 
     public static CubeManager Instance;
 
@@ -56,6 +68,11 @@ public class CubeManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Z)) {
             RotateVertical(xSize, Vector2.right);
         }
+        
+        // To test basic undo easely on editor mode.
+        if(Input.GetKeyDown(KeyCode.E)) {
+            _UndoLastRotation();
+        }
     }
 
     // TODO : Refactor to get one function for horizontal vertical
@@ -73,7 +90,8 @@ public class CubeManager : MonoBehaviour
             }
         }
 
-        _RotateParentCube(miniCubeHorizontal, false, direction);
+        // TODO use the direction and not send a hardcoded vector.
+        _RotateParentCube(miniCubeHorizontal, direction, new Vector2(0, y));
     }
 
 
@@ -94,15 +112,17 @@ public class CubeManager : MonoBehaviour
             }
         }
 
-        _RotateParentCube(miniCubeVertical, true, direction);
+        // TODO use the direction and not send a hardcoded vector.
+        _RotateParentCube(miniCubeVertical, direction, new Vector2(x, 0));
     }
 
 
-    private void _RotateParentCube(List<MiniCube> miniCubeRotation, bool vertical, Vector2 direction) {
+    private void _RotateParentCube(List<MiniCube> miniCubeRotation, Vector2 direction, Vector2 yx) {
 
         Transform parentTransform = null;
 
-        string parentName = vertical ? "row" + ySize : "column" + xSize;
+        bool vertical = Mathf.Abs(direction.x) > 0;
+        string parentName = vertical ? "row" + yx.y : "column" + yx.x;
 
         // Getting our parent from our dictionnary
         if (_parentTransform.TryGetValue(parentName, out parentTransform)) {
@@ -113,15 +133,15 @@ public class CubeManager : MonoBehaviour
                 miniCubeRotation[i].transform.parent = parentTransform.transform;
             }
 
+
             // We only go one way, but when we'll have our drag direction
-            if (vertical) {
-                var rotatingVector = direction * new Vector3(90, 0, 0);
-                parentTransform.transform.Rotate(rotatingVector);
-            }
-            else {
-                var rotatingVector = direction * new Vector3(0, 90, 0);
-                parentTransform.transform.Rotate(rotatingVector);
-            }
+            // Because direction is either in X or Y, 90 * 0 gives 0 so we only rotate on one side anyway.
+            Vector2 rotationValue;
+            rotationValue = direction * new Vector3(90, 90, 0);
+            parentTransform.transform.Rotate(rotationValue);
+
+            if(_undo)
+                _SaveLastMovement(direction, yx);
 
             // Unsetting all the parents
             for (int i = 0; i < miniCubeRotation.Count; i++) {
@@ -154,11 +174,46 @@ public class CubeManager : MonoBehaviour
         for (int i = 0; i < numberCubes; i++) {
             Vector3 positionHorizontalParent = Vector3.Lerp(new Vector3(i, 0, 0), new Vector3(i, numberCubes - 1, numberCubes - 1), 0.5f);
 
-            var fakeParent = new GameObject();
-            fakeParent.transform.localEulerAngles = Vector3.zero;
-            fakeParent.transform.localPosition = positionHorizontalParent;
-            fakeParent.name = "row" + i;
-            _parentTransform.Add(fakeParent.name, fakeParent.transform);
+            var parentRotation = new GameObject();
+            parentRotation.transform.localEulerAngles = Vector3.zero;
+            parentRotation.transform.localPosition = positionHorizontalParent;
+            parentRotation.name = "row" + i;
+            _parentTransform.Add(parentRotation.name, parentRotation.transform);
         }
+    }
+
+    ///<summary>
+    /// Save the last movement done by the player
+    /// Taking direction and row / column as parameter
+    ///</summary>
+    private void _SaveLastMovement(Vector2 direction, Vector2 xy) {
+        UndoRotation undoRotation = new UndoRotation();
+        undoRotation.direction = direction;
+        undoRotation.columnRow = xy;
+        _undoRotation.Push(undoRotation);
+    }
+
+    ///<summary>
+    /// Undo the last movement done by the player by inverting the last direction
+    ///</summary>
+    private void _UndoLastRotation() {
+        // Stack is empty, no need to undo
+        if (_undoRotation.Count == 0)
+            return;
+
+        var undoRotation = _undoRotation.Pop();
+
+        // We invert the direction
+        undoRotation.direction *= - 1;
+        // TODO maybe a more elegant way of preventing a save while undoing
+        _undo = false;
+
+        // Direction tell us if it's horitonzal / vertical movement
+        if (Mathf.Abs(undoRotation.direction.x) > 0)
+            RotateVertical((int)undoRotation.columnRow.x, undoRotation.direction);
+        else if (Mathf.Abs(undoRotation.direction.y) > 0)
+            RotateHorizontal((int)undoRotation.columnRow.y, undoRotation.direction);
+
+        _undo = true;
     }
 }

@@ -134,7 +134,6 @@ public class CubeManager : MonoBehaviour
                 Debug.Log("Z pos " + miniCubeZPos);
                 miniCube.xyz = new Vector3Int(miniCube.xyz.x, miniCube.xyz.y, miniCubeZPos);
                 miniCubeDown.Add(_miniCubes[i]);
-                Debug.LogError(_miniCubes[i]);
             }
         }
 
@@ -148,17 +147,16 @@ public class CubeManager : MonoBehaviour
         Transform parentTransform = null;
 
         string parentName = "";
-        if (Mathf.Abs(direction.y) > 0) {
+        if (Mathf.Abs(direction.x) > 0) {
              parentName = "row" + yx.y;
         }
-        else if (Mathf.Abs(direction.x) > 0) {
+        else if (Mathf.Abs(direction.y) > 0) {
              parentName = "column" + yx.x;
         }
         else if (Mathf.Abs(direction.z) > 0) {
              parentName = "zPos" + yx.z;
         }
 
-        Debug.LogError(parentName);
         // Getting our parent from our dictionnary
         if (_parentTransform.TryGetValue(parentName, out parentTransform)) {
 
@@ -167,7 +165,6 @@ public class CubeManager : MonoBehaviour
             for (int i = 0; i < miniCubeRotation.Count; i++) {
                 miniCubeRotation[i].transform.parent = parentTransform.transform;
             }
-
 
             // We only go one way, but when we'll have our drag direction
             // Because direction is either in X or Y, 90 * 0 gives 0 so we only rotate on one side anyway.

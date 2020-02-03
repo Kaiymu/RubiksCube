@@ -17,6 +17,9 @@ public class CubeManager : MonoBehaviour
     // Parent that gets rotated and get row / column of cubes as children temporarly 
     private Dictionary<string, Transform> _parentTransform = new Dictionary<string, Transform>();
 
+    // Not doing rotation while we already do one
+    private bool _rotate;
+
     // TODO might move all the rotation to an other file for more clarity
     // Undo rotation
     private Stack<UndoRotation> _undoRotation = new Stack<UndoRotation>();
@@ -25,7 +28,7 @@ public class CubeManager : MonoBehaviour
     private class UndoRotation
     {
         public Vector3 direction = Vector3.zero;
-        public Vector3 columnRowDepth = new Vector2(-1, -1);
+        public int columnRowDepth = -1;
     }
 
     public static CubeManager Instance;
@@ -62,11 +65,11 @@ public class CubeManager : MonoBehaviour
     private void Update() {
         // Just to test basic rotation, the drag code to touch our cubes will replace that
         if (Input.GetKeyDown(KeyCode.A)) {
-            RotateHorizontal(ySize, Vector2.up);
+            Rotate(new Vector2(0, ySize), Vector2.up);
         }
 
         if (Input.GetKeyDown(KeyCode.Z)) {
-            RotateVertical(xSize, Vector2.right);
+            Rotate(new Vector2(xSize,0), Vector2.right);
         }
 
         if (Input.GetKeyDown(KeyCode.R)) {
@@ -79,46 +82,39 @@ public class CubeManager : MonoBehaviour
         }
     }
 
-    // TODO : Refactor to get one function for horizontal vertical
-    public void RotateHorizontal(int y, Vector3 direction) {
-        var miniCubeHorizontal = new List<MiniCube>();
+    public void Rotate(Vector2 rowColumn, Vector3 direction) {
+        if (_rotate)
+            return;
 
+        var miniCubes = new List<MiniCube>();
+        int xyz = 0;
         for (int i = 0; i < _miniCubes.Count; i++) {
             // We round them to int because of floating precision issue.
-            int miniCubeYPos = Mathf.RoundToInt(_miniCubes[i].transform.position.y);
-            if (miniCubeYPos == y) {
-                Debug.Log("Row " + miniCubeYPos);
-                miniCube.xyz = new Vector3Int(miniCube.xyz.x, miniCubeYPos, miniCube.xyz.z);
-                miniCubeHorizontal.Add(_miniCubes[i]);
-
-            }
-        }
-
-        // TODO use the direction and not send a hardcoded vector.
-        _RotateParentCube(miniCubeHorizontal, direction, new Vector3(0, y, 0));
-    }
-
-
-    // TODO : Refactor to get one function for horizontal vertical
-    public void RotateVertical(int x, Vector3 direction) {
-        var miniCubeVertical = new List<MiniCube>();
-
-        for (int i = 0; i < _miniCubes.Count; i++) {
+            int miniCubePos;
             var miniCube = _miniCubes[i];
-            // We round them to int because of floating precision issue.
-            int miniCubeXPos = Mathf.RoundToInt(miniCube.transform.position.x);
-            
-            // Getting all the cubes from the same row
-            if (miniCubeXPos == x) {
-                Debug.Log("Column " + miniCubeXPos);
-                miniCube.xyz = new Vector3Int(miniCubeXPos, miniCube.xyz.y, miniCube.xyz.z);
-                miniCubeVertical.Add(_miniCubes[i]);
+            if (direction.y != 0) {
+                miniCubePos = Mathf.RoundToInt(miniCube.transform.position.y);
+                if (miniCubePos == rowColumn.y) {
+                    xyz = (int)rowColumn.y;
+                    miniCube.xyz = new Vector3Int(miniCube.xyz.x, miniCubePos, miniCube.xyz.z);
+                    miniCubes.Add(miniCube);
+                }
             }
+            else if (direction.x != 0) {
+                miniCubePos = Mathf.RoundToInt(miniCube.transform.position.x);
+                if (miniCubePos == rowColumn.x) {
+                    xyz = (int)rowColumn.x;
+                    miniCube.xyz = new Vector3Int(miniCubePos, miniCube.xyz.y, miniCube.xyz.z);
+                    miniCubes.Add(miniCube);
+                }
+            }
+
         }
 
         // TODO use the direction and not send a hardcoded vector.
-        _RotateParentCube(miniCubeVertical, direction, new Vector3(x, 0, 0));
+        _RotateParentCube(miniCubes, direction, xyz);
     }
+
 
     // TODO huge refactor needed to prevent having 3 time the same functions.
     public void RotateDepth(int z, Vector3 direction) {
@@ -138,22 +134,22 @@ public class CubeManager : MonoBehaviour
         }
 
         // TODO use the direction and not send a hardcoded vector.
-        _RotateParentCube(miniCubeDown, direction, new Vector3(0, 0, z));
+        _RotateParentCube(miniCubeDown, direction, z);
     }
 
-    private void _RotateParentCube(List<MiniCube> miniCubeRotation, Vector3 direction, Vector3 xyz) {
+    private void _RotateParentCube(List<MiniCube> miniCubeRotation, Vector3 direction, int xyz) {
 
         Transform parentTransform = null;
 
         string parentName = "";
         if (Mathf.Abs(direction.x) > 0) {
-             parentName = "row" + xyz.y;
+            parentName = "row" + xyz;
         }
         else if (Mathf.Abs(direction.y) > 0) {
-             parentName = "column" + xyz.x;
+            parentName = "column" + xyz;
         }
         else if (Mathf.Abs(direction.z) > 0) {
-             parentName = "depth" + xyz.z;
+            parentName = "depth" + xyz;
         }
 
         // Getting our parent from our dictionnary
@@ -165,19 +161,21 @@ public class CubeManager : MonoBehaviour
                 miniCubeRotation[i].transform.parent = parentTransform.transform;
             }
 
-            // We only go one way, but when we'll have our drag direction
-            // Because direction is either in X or Y, 90 * 0 gives 0 so we only rotate on one side anyway.
-            Vector3 rotationValue;
-            rotationValue = Vector3.Scale(direction, new Vector3(90, 90, 90));
-            parentTransform.transform.Rotate(rotationValue);
+            Vector3 rotationValue = Vector3.Scale(direction, new Vector3(90, 90, 90));
+            rotationValue += parentTransform.localEulerAngles;
 
-            if(_undo)
+            _rotate = true;
+
+            LeanTween.rotate(parentTransform.gameObject, rotationValue, 0.5f)
+            .setOnComplete(() => {
+                for (int i = 0; i < miniCubeRotation.Count; i++) {
+                    miniCubeRotation[i].transform.parent = null;
+                }
+                _rotate = false;
+            });
+
+            if (_undo)
                 _SaveLastMovement(direction, xyz);
-
-            // Unsetting all the parents
-            for (int i = 0; i < miniCubeRotation.Count; i++) {
-                miniCubeRotation[i].transform.parent = null;
-            }
         }
         
     }
@@ -192,42 +190,39 @@ public class CubeManager : MonoBehaviour
         // TODO : Refactor to only do one loop.
         for (int i = 0; i < numberCubes; i++) {
             // We get the middle position of our farthest cubes in the current vertical row.
-            Vector3 positionHVerticalParent = Vector3.Lerp(new Vector3(0, i, 0), new Vector3(numberCubes - 1, i, numberCubes - 1), 0.5f);
-
-            // We create our object, set it's position and add it to the dictionnary while giving it a unique name.
-            var parentRotation = new GameObject();
-            parentRotation.transform.localEulerAngles = Vector3.zero;
-            parentRotation.transform.localPosition = positionHVerticalParent;
-            parentRotation.name = "column" + i;
-            _parentTransform.Add(parentRotation.name, parentRotation.transform);
-        }
-
-        for (int i = 0; i < numberCubes; i++) {
+            Vector3 positionVerticalParent = Vector3.Lerp(new Vector3(0, i, 0), new Vector3(numberCubes - 1, i, numberCubes - 1), 0.5f);
             Vector3 positionHorizontalParent = Vector3.Lerp(new Vector3(i, 0, 0), new Vector3(i, numberCubes - 1, numberCubes - 1), 0.5f);
-
-            var parentRotation = new GameObject();
-            parentRotation.transform.localEulerAngles = Vector3.zero;
-            parentRotation.transform.localPosition = positionHorizontalParent;
-            parentRotation.name = "row" + i;
-            _parentTransform.Add(parentRotation.name, parentRotation.transform);
-        }
-
-        for (int i = 0; i < numberCubes; i++) {
             Vector3 positionDepthParent = Vector3.Lerp(new Vector3(0, 0, i), new Vector3(numberCubes - 1, numberCubes - 1, i), 0.5f);
+            
+            // We create our objects, set it's position and add it to the dictionnary while giving it a unique name.
+            var parentRotationX = new GameObject();
+            var parentRotationY = new GameObject();
+            var parentRotationZ = new GameObject();
 
-            var parentRotation = new GameObject();
-            parentRotation.transform.localEulerAngles = Vector3.zero;
-            parentRotation.transform.localPosition = positionDepthParent;
-            parentRotation.name = "depth" + i;
-            _parentTransform.Add(parentRotation.name, parentRotation.transform);
+            parentRotationX.transform.localEulerAngles = Vector3.zero;
+            parentRotationX.transform.localPosition = positionVerticalParent;
+            parentRotationX.name = "column" + i;
+
+            parentRotationY.transform.localEulerAngles = Vector3.zero;
+            parentRotationY.transform.localPosition = positionHorizontalParent;
+            parentRotationY.name = "row" + i;
+
+            parentRotationZ.transform.localEulerAngles = Vector3.zero;
+            parentRotationZ.transform.localPosition = positionDepthParent;
+            parentRotationZ.name = "depth" + i;
+
+            _parentTransform.Add(parentRotationX.name, parentRotationX.transform);
+            _parentTransform.Add(parentRotationY.name, parentRotationY.transform);
+            _parentTransform.Add(parentRotationZ.name, parentRotationZ.transform);
         }
+
     }
 
     ///<summary>
     /// Save the last movement done by the player
     /// Taking direction and row / column as parameter
     ///</summary>
-    private void _SaveLastMovement(Vector3 direction, Vector3 xyz) {
+    private void _SaveLastMovement(Vector3 direction, int xyz) {
         UndoRotation undoRotation = new UndoRotation();
         undoRotation.direction = direction;
         undoRotation.columnRowDepth = xyz;
@@ -251,11 +246,11 @@ public class CubeManager : MonoBehaviour
 
         // Direction tell us if it's horitonzal / vertical movement
         if (Mathf.Abs(undoRotation.direction.x) > 0)
-            RotateVertical((int)undoRotation.columnRowDepth.x, undoRotation.direction);
+            Rotate(new Vector2(undoRotation.columnRowDepth, 0), undoRotation.direction);
         else if (Mathf.Abs(undoRotation.direction.y) > 0)
-            RotateHorizontal((int)undoRotation.columnRowDepth.y, undoRotation.direction);
+            Rotate(new Vector2(undoRotation.columnRowDepth, 0), undoRotation.direction);
         else if (Mathf.Abs(undoRotation.direction.z) > 0)
-            RotateDepth((int)undoRotation.columnRowDepth.z, undoRotation.direction);
+            RotateDepth((int)undoRotation.columnRowDepth, undoRotation.direction);
 
         _undo = true;
     }

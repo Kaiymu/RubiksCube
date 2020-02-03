@@ -7,6 +7,7 @@ public class RaycastCubeDrag : MonoBehaviour
     private MiniCube _miniCubeSelected;
     private Vector3 _previousMousePos = Vector3.zero;
 
+    public GameObject cube;
     private bool rotate = false;
 
     // TODO : Refactor with Input.Touch, for now we'll use editor for our test
@@ -29,14 +30,43 @@ public class RaycastCubeDrag : MonoBehaviour
                 Debug.Log("Touched mini cube");
                 _miniCubeSelected = hit.transform.GetComponent<MiniCube>();
                 _miniCubeSelected.selected = true;
-                _previousMousePos = Input.mousePosition;
+                var v3 = Input.mousePosition;
+                v3.z = 10.0f;
+                _previousMousePos = Camera.main.ScreenToWorldPoint(v3);
             }
         }
     }
 
     private void _UnselectCube() {
+        if (_miniCubeSelected == null)
+            return;
+
         if (Input.GetMouseButtonUp(0) || TouchEndMobile()) {
-            _miniCubeSelected = null;
+            var mousePosition = MouseOrMobilePosition();
+
+            // We get the direction between the mouse and the cube
+
+            var cubeSelectedWorldPos = Camera.main.WorldToScreenPoint(_miniCubeSelected.transform.localPosition);
+            var direction = MouseOrMobilePosition() - (cubeSelectedWorldPos);
+            direction.Normalize();
+
+            // TODO still a bit clunky, sometime sends both value
+            Vector3Int directionInverted = new Vector3Int(Mathf.RoundToInt(direction.y),
+                Mathf.RoundToInt(direction.x),
+                0);
+
+            Vector2 rowColumn = Vector2.zero;
+            // Getting the right row / column when sending the direction
+            if (Mathf.Abs(directionInverted.x) == 1) {
+                rowColumn.x = Mathf.RoundToInt(_miniCubeSelected.transform.position.x);
+            } else if (Mathf.Abs(directionInverted.y) == 1) {
+                rowColumn.y = Mathf.RoundToInt(_miniCubeSelected.transform.position.y);
+            }
+
+            rotate = true;
+
+            CubeManager.Instance.Rotate(rowColumn, directionInverted);
+            //_miniCubeSelected = null;
             rotate = false;
             _previousMousePos = Vector3.zero;
         }
@@ -48,36 +78,6 @@ public class RaycastCubeDrag : MonoBehaviour
             return;
 
         if ((Input.GetMouseButton(0) || Input.touchCount > 0) && _miniCubeSelected != null) {
-            Vector3 inputSubstracted = MouseOrMobilePosition() - _previousMousePos;
-
-            var direction = inputSubstracted - _miniCubeSelected.transform.position;
-
-            // TODO Use the difference between player pos / mouse pos to make the right rotation and not hardcoded like so
-            direction.Normalize();
-
-            if (Mathf.Abs(inputSubstracted.x) > Mathf.Abs(inputSubstracted.y)) {
-                int miniCubeYPos = Mathf.RoundToInt(_miniCubeSelected.transform.position.y);
-                rotate = true;
-
-                if (_previousMousePos.x < MouseOrMobilePosition().x) {
-                    CubeManager.Instance.RotateHorizontal(miniCubeYPos, Vector3.down);
-                }
-                else if (_previousMousePos.x > MouseOrMobilePosition().x) {
-                    CubeManager.Instance.RotateHorizontal(miniCubeYPos, Vector3.up);
-                }
-            }
-
-            if (Mathf.Abs(inputSubstracted.x) < Mathf.Abs(inputSubstracted.y)) {
-                int miniCubeXPos = Mathf.RoundToInt(_miniCubeSelected.transform.position.x);
-                rotate = true;
-                if (_previousMousePos.y < MouseOrMobilePosition().y) {
-                    CubeManager.Instance.RotateVertical(miniCubeXPos, Vector3.right);
-                }
-                else if (_previousMousePos.y > MouseOrMobilePosition().y) {
-                    CubeManager.Instance.RotateVertical(miniCubeXPos, Vector3.left);
-                }
-            }
-
             _previousMousePos = MouseOrMobilePosition();
         }
     }
@@ -86,7 +86,9 @@ public class RaycastCubeDrag : MonoBehaviour
 
 
 #if UNITY_EDITOR
-        return Input.mousePosition;
+        var mousePosition = Input.mousePosition;
+        mousePosition.z = 10.0f;
+        return mousePosition;
 #elif UNITY_IPHONE || UNITY_ANDROID
         if (Input.touchCount > 0) {
                    return Input.GetTouch(0).position;

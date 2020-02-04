@@ -12,6 +12,8 @@ public class CubeManager : MonoBehaviour
     public int numberCubes = 2;
 
     private MiniCube _miniCubeSelected;
+    private GameObject _miniCubeParent;
+
     public MiniCube MiniCubeSelected
     {
         get { return _miniCubeSelected; }
@@ -33,6 +35,7 @@ public class CubeManager : MonoBehaviour
 
     // Storing all our cubes here
     private List<MiniCube> _miniCubes = new List<MiniCube>();
+    private Dictionary<Vector3, Face> _faces = new Dictionary<Vector3, Face>();
 
     // Parent that gets rotated and get row / column of cubes as children temporarly 
     private Dictionary<string, Transform> _parentTransform = new Dictionary<string, Transform>();
@@ -46,6 +49,10 @@ public class CubeManager : MonoBehaviour
     // Undo rotation
     private Stack<UndoRotation> _undoRotation = new Stack<UndoRotation>();
     private bool _saveLastMovement = true;
+
+    // TODO might put it global and constant
+    private List<Vector3> _faceList = new List<Vector3>();
+    public enum COLORS { NONE, GREEN, YELLOW, RED, WHITE, BLUE, ORANGE }
 
     private class UndoRotation
     {
@@ -71,20 +78,83 @@ public class CubeManager : MonoBehaviour
         // Because of floating point imprecision i'd rather use int that floats
         Vector3Int cubePosition = Vector3Int.zero;
 
+        _miniCubeParent = new GameObject();
+        _miniCubeParent.name = "[MINI CUBE PARENT]";
+
         for (int i = 0; i < numberCubes; i++) {
             for (int j = 0; j < numberCubes; j++) {
                 for (int k = 0; k < numberCubes; k++) {
-                    // X, Y, Z
+                    
+                    // Not creating mini cubes that are "inside" the cube and that the player cannot see
+                    if((k > 0 && k < numberCubes - 1) &&
+                        (j > 0 && j < numberCubes - 1) &&
+                            (i > 0 && i < numberCubes - 1))
+                    {
+                        continue;
+                    }
+
+
                     cubePosition = new Vector3Int(k, j, i);
                     MiniCube newMiniCube = Instantiate(miniCube, cubePosition, Quaternion.identity);
                     newMiniCube.xyz = cubePosition;
                     newMiniCube.transform.position = cubePosition;
+                    newMiniCube.transform.parent = _miniCubeParent.transform;
                     _miniCubes.Add(newMiniCube);
+
                 }
             }
         }
+
+        _CreatingFaces();
     }
 
+    ///<summary>
+    /// Sending a direction to make a rotation between xyz
+    ///</summary>
+    private void _CreatingFaces() {
+
+        // TODO might put that globally to be also used by the MiniCube elements
+        _faceList.Add(Vector3.forward);
+        _faceList.Add(Vector3.back);
+        _faceList.Add(Vector3.up);
+        _faceList.Add(Vector3.down);
+        _faceList.Add(Vector3.right);
+        _faceList.Add(Vector3.left);
+
+        var parentGameobjectFace = new GameObject();
+        parentGameobjectFace.name = "[FACE PARENT]";
+
+        for (int i = 0; i < _faceList.Count; i++)
+        {
+            var faceObject = new GameObject();
+            var face = faceObject.AddComponent<Face>();
+            face.transform.parent = parentGameobjectFace.transform;
+            face.transform.forward = _faceList[i];
+            face.name = "Face : " + _faceList[i];
+            _faces.Add(_faceList[i], face);
+        }
+
+        
+        for(int i = 0; i < _miniCubes.Count; i++)
+        {
+            var miniCube = _miniCubes[i];
+
+            // TODO Find a better way to select all the faces, maybe with a colliders spawned.
+            // First face
+            /*
+            if ((miniCube.transform.position.x >= 0 &&
+                miniCube.transform.position.x <= numberCubes - 1)
+                && (miniCube.transform.position.y >= 0 &&
+                miniCube.transform.position.y <= numberCubes - 1)
+                && (miniCube.transform.position.z == 0)) {
+            }
+            */
+        }
+    }
+
+    ///<summary>
+    /// Sending a direction to make a rotation between xyz
+    ///</summary>
     public void Rotate(Vector3 direction)
     {
         if (_rotate || _miniCubeSelected == null)
@@ -188,7 +258,7 @@ public class CubeManager : MonoBehaviour
             .setOnComplete(() => {
                 // We unparent the cubes and unblock the rotation
                 for (int i = 0; i < miniCubeRotation.Count; i++) {
-                    miniCubeRotation[i].transform.parent = null;
+                    miniCubeRotation[i].transform.parent = _miniCubeParent.transform;
                 }
                 _rotate = false;
             });
@@ -206,6 +276,8 @@ public class CubeManager : MonoBehaviour
     ///</summary>
     private void _CreateParentRotation() {
 
+        var parentColumnRowDepth = new GameObject();
+        parentColumnRowDepth.name = "[PARENT COLUMN ROW DEPTH]";
         // TODO : Refactor to only do one loop.
         for (int i = 0; i < numberCubes; i++) {
             // We get the middle position of our farthest cubes in the current vertical row.
@@ -233,6 +305,11 @@ public class CubeManager : MonoBehaviour
             _parentTransform.Add(parentRotationX.name, parentRotationX.transform);
             _parentTransform.Add(parentRotationY.name, parentRotationY.transform);
             _parentTransform.Add(parentRotationZ.name, parentRotationZ.transform);
+
+            parentRotationX.transform.parent = parentColumnRowDepth.transform;
+            parentRotationY.transform.parent = parentColumnRowDepth.transform;
+            parentRotationZ.transform.parent = parentColumnRowDepth.transform;
+
         }
     }
 
@@ -251,6 +328,9 @@ public class CubeManager : MonoBehaviour
     /// Undo the last movement done by the player by inverting the last direction
     ///</summary>
     public void UndoLastRotation() {
+        if (_rotate)
+            return;
+
         // Stack is empty, no need to undo
         if (_undoRotation.Count == 0)
         {

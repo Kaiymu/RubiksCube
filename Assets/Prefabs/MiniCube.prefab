@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 832425327770592421}
   - component: {fileID: 7763250219306361281}
   m_Layer: 0
-  m_Name: Bottom-Yellow
+  m_Name: Down-Yellow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26,11 +26,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1749649433228522387}
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: -0.51, z: -0}
+  m_LocalPosition: {x: 0, y: -0.51, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 6342059846357828861}
-  m_RootOrder: 4
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!33 &832425327770592421
 MeshFilter:
@@ -107,7 +107,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 6342059846357828861}
-  m_RootOrder: 3
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &3891764637063574542
 MeshFilter:
@@ -185,12 +185,12 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 4152218662402268952}
-  - {fileID: 1592854967586056499}
-  - {fileID: 976368131727885677}
-  - {fileID: 7512176157579097864}
-  - {fileID: 2280488863029400564}
   - {fileID: 3128504550658912284}
+  - {fileID: 2280488863029400564}
+  - {fileID: 976368131727885677}
+  - {fileID: 1592854967586056499}
+  - {fileID: 4152218662402268952}
+  - {fileID: 7512176157579097864}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -266,6 +266,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   xyz: {x: 0, y: 0, z: 0}
   selected: 0
+  faceColor:
+  - facingDirection: {x: 0, y: 0, z: 1}
+    colorFace: 5
+  - facingDirection: {x: 0, y: 0, z: -1}
+    colorFace: 6
+  - facingDirection: {x: 0, y: 1, z: 0}
+    colorFace: 3
+  - facingDirection: {x: 0, y: -1, z: 0}
+    colorFace: 4
+  - facingDirection: {x: 1, y: 0, z: 0}
+    colorFace: 1
+  - facingDirection: {x: -1, y: 0, z: 0}
+    colorFace: 2
 --- !u!1 &6640516609191103625
 GameObject:
   m_ObjectHideFlags: 0
@@ -278,7 +291,7 @@ GameObject:
   - component: {fileID: 6244239286949969493}
   - component: {fileID: 3555242045161873579}
   m_Layer: 0
-  m_Name: Top-Green
+  m_Name: Up-Green
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -292,11 +305,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6640516609191103625}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0.51, z: -0}
+  m_LocalPosition: {x: 0, y: 0.51, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 6342059846357828861}
-  m_RootOrder: 5
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!33 &6244239286949969493
 MeshFilter:
@@ -355,7 +368,7 @@ GameObject:
   - component: {fileID: 3791264038775772672}
   - component: {fileID: 223837871568771640}
   m_Layer: 0
-  m_Name: Left-Red
+  m_Name: Right-Red
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -369,7 +382,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7064847122948288171}
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0.51, y: 0, z: -0}
+  m_LocalPosition: {x: 0.51, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 6342059846357828861}
@@ -432,7 +445,7 @@ GameObject:
   - component: {fileID: 1475132620339821305}
   - component: {fileID: 3679389785751407650}
   m_Layer: 0
-  m_Name: Front-Blue
+  m_Name: Forward-Blue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -450,7 +463,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 6342059846357828861}
-  m_RootOrder: 0
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!33 &1475132620339821305
 MeshFilter:
@@ -509,7 +522,7 @@ GameObject:
   - component: {fileID: 7575208606726079607}
   - component: {fileID: 8507770773901423857}
   m_Layer: 0
-  m_Name: Right-White
+  m_Name: Left-White
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -527,7 +540,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 6342059846357828861}
-  m_RootOrder: 1
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!33 &7575208606726079607
 MeshFilter:

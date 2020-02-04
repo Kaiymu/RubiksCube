@@ -819,7 +819,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   miniCube: {fileID: 7616513349470255759, guid: 713f9c295d18c4142a2bdc0eb2f16369,
     type: 3}
-  numberCubes: 2
+  numberCubes: 6
+  faceList: []
 --- !u!1 &610287562
 GameObject:
   m_ObjectHideFlags: 0

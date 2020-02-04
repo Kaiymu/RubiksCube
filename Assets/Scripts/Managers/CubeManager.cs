@@ -172,24 +172,21 @@ public class CubeManager : MonoBehaviour
             Rotation randomRotation;
 
             for (int i = 0; i < GameManager.Instance.numberRandomScramble; i++) {
+                // Random direction, will help choosing between xyz
                 float randomRangeDir = Random.Range(0, 3);
+
+                // Random sign will provide a + or a - sign
+                int randomDirectionExcludeZero = Random.Range(0, 2) * 2 - 1;
+
                 randomDirection = Vector3.zero;
-
-                int randomSignRange = Random.Range(0, 1);
-
-                if(randomSignRange == 0) {
-                    randomSignRange = 1;
-                } else {
-                    randomSignRange = -1;
-                }
-
+                // We have to do so to only have one of the vector value to be -1 or 1.
                 if (randomRangeDir == 0) {
-                    randomDirection.x = 1 * randomSignRange;
+                    randomDirection.x = randomDirectionExcludeZero;
                 } else if (randomRangeDir == 1) {
-                    randomDirection.y = 1 * randomSignRange;
+                    randomDirection.y = randomDirectionExcludeZero;
                 }
                 else if (randomRangeDir == 2) {
-                    randomDirection.z = 1 * randomSignRange;
+                    randomDirection.z =randomDirectionExcludeZero;
                 }
 
                 randomRowColumnDepth = new Vector3(Random.Range(0, _numberCubes), Random.Range(0, _numberCubes), Random.Range(0, _numberCubes));
@@ -200,10 +197,8 @@ public class CubeManager : MonoBehaviour
                 _randomScrambledDirRowColumnDepth.Push(randomRotation);
             }
 
-            _UnstackRandomDirection();
-            // We scrambled the rubik cube, we can start the game :)
-
             randomRotation = null;
+            _UnstackRandomDirection();
         }
     }
 
@@ -211,7 +206,12 @@ public class CubeManager : MonoBehaviour
         // Stack is empty, no need to undo
         if (_randomScrambledDirRowColumnDepth.Count == 0) {
             Debug.Log("Scrambled stack empty, game can start");
+
+            // We scrambled the rubik cube, we can start the game :)
             GameManager.Instance.gameState = GameManager.GAME_STATE.PLAYING;
+
+            _randomScrambledDirRowColumnDepth.Clear();
+            _randomScrambledDirRowColumnDepth = null;
             return;
         }
 

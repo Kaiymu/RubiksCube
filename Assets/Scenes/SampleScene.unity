@@ -805,6 +805,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45fa9e8fedba52346a6ea0d705e22c0e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameState: 0
+  numberCube: 6
+  numberRandomScramble: 10
 --- !u!114 &400561454
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -821,7 +824,9 @@ MonoBehaviour:
     type: 3}
   facePrefab: {fileID: 8614213615077702617, guid: 991c86abbccc26847ba036d4cbaf5270,
     type: 3}
-  numberCubes: 2
+  rotationTimePlaying: 0.5
+  rotationTimeScrambled: 0.1
+  leanTweenEase: 4
 --- !u!1 &610287562
 GameObject:
   m_ObjectHideFlags: 0
@@ -958,7 +963,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: NaN, w: 1.05e-43}
+  m_BoundingSphereOverride: {x: 0, y: -2.4239064e+18, z: 1.022e-42, w: -2.3742392e+18}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0

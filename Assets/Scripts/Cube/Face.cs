@@ -5,6 +5,11 @@ using UnityEngine;
 public class Face : MonoBehaviour
 {
     private List<MiniCube> _faceCube = new List<MiniCube>();
+    private BoxCollider _boxCollider;
+
+    private void Awake() {
+        _boxCollider = GetComponent<BoxCollider>();
+    }
 
     private void OnTriggerEnter(Collider other) {
         int layerCollided = other.gameObject.layer;
@@ -13,7 +18,7 @@ public class Face : MonoBehaviour
             var miniCube = other.gameObject.GetComponent<MiniCube>();
             _faceCube.Add(miniCube);
             
-            if((CubeManager.Instance.numberCubes * 2) == _faceCube.Count) {
+            if((GameManager.Instance.numberCube * 2) == _faceCube.Count) {
                 Debug.LogError(_CheckColorsFace());
             }
         }
@@ -21,27 +26,34 @@ public class Face : MonoBehaviour
 
     private bool _CheckColorsFace()
     {
-        CubeManager.COLORS tempColor = CubeManager.COLORS.NONE;
+        Vector3 tempColor = Vector3.zero;
 
+        // Check if they all have the same forward.
         for (int i = 0; i < _faceCube.Count; i++)
         {
-            var colorCube = _faceCube[i].GetCurrentFacedColor(transform.forward);
-            if (tempColor == CubeManager.COLORS.NONE)
+            var forwardCube = _faceCube[i].transform.forward;
+            if (tempColor == Vector3.zero)
             {
-                tempColor = colorCube;
+                tempColor = forwardCube;
             }
 
-            if(tempColor == colorCube)
+            if(tempColor != forwardCube)
             {
-                Debug.Log("Face : " + gameObject.name + " has the same color");
-            } else
-            {
-                Debug.Log("Face doesn't have the same colors");
+                Debug.Log("Face doesn't have the same colors, no victory");
                 return false;
             }
         }
 
         return true;
+    }
+
+    public void ActivateColliders() {
+        _boxCollider.enabled = true;
+    }
+
+    public void ResetColliders() {
+        _boxCollider.enabled = false;
+        _faceCube.Clear();
     }
 
 } 

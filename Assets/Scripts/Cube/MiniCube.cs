@@ -18,15 +18,4 @@ public class MiniCube : MonoBehaviour
         public Vector3 facingDirection;
         public CubeManager.COLORS colorFace;
     }
-
-    public CubeManager.COLORS GetCurrentFacedColor(Vector3 forwardVector)
-    {
-        for (int i = 0; i < faceColor.Count; i++)
-        {
-            if (faceColor[i].facingDirection == transform.forward)
-            {
-            }
-        }
-        return CubeManager.COLORS.NONE;
-    }
 }

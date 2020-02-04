@@ -6,17 +6,13 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    private void Awake() {
-        if (Instance == null)
-            Instance = this;
-        else {
-            Destroy(gameObject);
-        }
+    private GameObject _centerOfCube;
 
-        DontDestroyOnLoad(this);
+    public Transform CenterOfCube {
+        get { return _centerOfCube.transform; }
     }
 
-    public enum GAME_STATE { SCRAMBLED, PLAYING, WIN}
+    public enum GAME_STATE { SCRAMBLED, PLAYING, WIN, MAIN_MENU }
     public GAME_STATE gameState = GAME_STATE.SCRAMBLED;
 
     [Header("Number of cube to spawn X*X*X")]
@@ -25,6 +21,28 @@ public class GameManager : MonoBehaviour
 
     [Header("Number of random direction and positive that the cubes will do before starting the game")]
     public int numberRandomScramble = 10;
+
+    private void Awake() {
+        if (Instance == null)
+            Instance = this;
+        else {
+            Destroy(gameObject);
+        }
+
+        DontDestroyOnLoad(this);
+        _CreateCenterOfCube();
+    }
+
+    private void _CreateCenterOfCube() {
+        if(gameState != GAME_STATE.MAIN_MENU) {
+
+            float centerOfCubeValue = numberCube / 2;
+            Vector3 centerOfCubePos = new Vector3(centerOfCubeValue, centerOfCubeValue, centerOfCubeValue);
+            _centerOfCube = new GameObject();
+            _centerOfCube.name = "[CENTER OF CUBE]";
+            _centerOfCube.transform.position = centerOfCubePos;
+        }
+    }
 
 }
 

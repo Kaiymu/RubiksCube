@@ -11,15 +11,21 @@ public class Face : MonoBehaviour
         _boxCollider = GetComponent<BoxCollider>();
     }
 
+    
     private void OnTriggerEnter(Collider other) {
         int layerCollided = other.gameObject.layer;
 
-        if(LayerMask.LayerToName(layerCollided) == "MiniCube") {
-            var miniCube = other.gameObject.GetComponent<MiniCube>();
+        _CheckCollisionMiniCube(other.gameObject, layerCollided);
+    }
+
+    private void _CheckCollisionMiniCube(GameObject collidedGameobject, int layerCollided) {
+        if (LayerMask.LayerToName(layerCollided) == "MiniCube") {
+            var miniCube = collidedGameobject.GetComponent<MiniCube>();
             _faceCube.Add(miniCube);
-            
-            if((GameManager.Instance.numberCube * 2) == _faceCube.Count) {
-                Debug.LogError(_CheckColorsFace());
+
+            // Here's win condition, if the 6 faces returns true.
+            if ((GameManager.Instance.numberCube * 2) == _faceCube.Count) {
+                //_CheckColorsFace
             }
         }
     }

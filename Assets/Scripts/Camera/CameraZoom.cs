@@ -9,7 +9,7 @@ public class CameraZoom : MonoBehaviour
 
     public float zoomSpeed;
 
-    private Transform _lookAt;
+    private GameObject _lookAt;
 
     private void Start() {
         _lookAt = GameManager.Instance.CenterOfCube;
@@ -37,6 +37,6 @@ public class CameraZoom : MonoBehaviour
     }
 
     private void LateUpdate() {
-        transform.LookAt(_lookAt);
+        transform.LookAt(_lookAt.transform);
     }
 }

@@ -126,7 +126,7 @@ public class CubeManager : MonoBehaviour
 
         var parentColumnRowDepth = new GameObject();
         parentColumnRowDepth.name = "[PARENT COLUMN ROW DEPTH]";
-        // TODO : Refactor to only do one loop.
+
         for (int i = 0; i < _numberCubes; i++) {
             // We get the middle position of our farthest cubes in the current vertical row.
             Vector3 positionVerticalParent = Vector3.Lerp(new Vector3(0, i, 0), new Vector3(_numberCubes - 1, i, _numberCubes - 1), 0.5f);
@@ -414,7 +414,7 @@ public class CubeManager : MonoBehaviour
     /// Undo the last movement done by the player by inverting the last direction
     ///</summary>
     public void UndoLastRotation() {
-        if (_canRotate)
+        if (!_canRotate)
             return;
 
         // Stack is empty, no need to undo
@@ -429,7 +429,6 @@ public class CubeManager : MonoBehaviour
         // We invert the direction
         undoRotation.direction *= - 1;
 
-        // TODO maybe a more elegant way of preventing a save while undoing
         _saveLastMovement = false;
 
         // Direction tell us if it's horitonzal / vertical movement

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -8,8 +9,8 @@ public class GameManager : MonoBehaviour
 
     private GameObject _centerOfCube;
 
-    public Transform CenterOfCube {
-        get { return _centerOfCube.transform; }
+    public GameObject CenterOfCube {
+        get { return _centerOfCube; }
     }
 
     public enum GAME_STATE { SCRAMBLED, PLAYING, WIN, MAIN_MENU }
@@ -30,13 +31,39 @@ public class GameManager : MonoBehaviour
         }
 
         DontDestroyOnLoad(this);
-        _CreateCenterOfCube();
+    }
+
+    private void OnEnable() {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    // TODO not keeping the scene logic here, might create a SceneManager for that, only for test purpose for now
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
+        if(scene.name == "SampleScene") {
+            gameState = GAME_STATE.SCRAMBLED;
+            _CreateCenterOfCube();
+        }
+
+        if (scene.name == "MenuScene") {
+            gameState = GAME_STATE.MAIN_MENU;
+        }
+    }
+
+    // TODO To remove, only for test purpose
+    private void Update() {
+        if (Input.GetKeyDown(KeyCode.A)) {
+            SceneManager.LoadScene(1);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Z)) {
+            SceneManager.LoadScene(0);
+        }
     }
 
     private void _CreateCenterOfCube() {
         if(gameState != GAME_STATE.MAIN_MENU) {
 
-            float centerOfCubeValue = numberCube / 2;
+            float centerOfCubeValue = (numberCube - 1) / 2f;
             Vector3 centerOfCubePos = new Vector3(centerOfCubeValue, centerOfCubeValue, centerOfCubeValue);
             _centerOfCube = new GameObject();
             _centerOfCube.name = "[CENTER OF CUBE]";

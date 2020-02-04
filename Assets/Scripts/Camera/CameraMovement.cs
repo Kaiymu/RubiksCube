@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CameraMovement : MonoBehaviour
 {
+    // Get the same transform as camera zoom, might store it somewhere.
     public Transform lookAt;
 
     private void Awake() {
@@ -11,6 +12,6 @@ public class CameraMovement : MonoBehaviour
     }
 
     private void Update() {
-        transform.RotateAround(lookAt.transform.position, Vector3.forward, 500 * Time.deltaTime);
+        // We'll surely use LeanTweet rotateAround instead.
     }
 }

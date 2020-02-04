@@ -7,6 +7,7 @@ public class CameraZoom : MonoBehaviour
     [Header("Boundaries min and max for camera, x is min, y max")]
     public Vector2 boundariesZoom = new Vector2(5, 10);
 
+    // Temporary look value, we'll get the center of our cube to make the camera look
     public Transform lookAt;
     public float zoomSpeed;
 

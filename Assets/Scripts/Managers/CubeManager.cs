@@ -5,25 +5,47 @@ using UnityEngine;
 
 public class CubeManager : MonoBehaviour
 {
+    [Header("Mini cube prefab")]
     public MiniCube miniCube;
+    [Header("Number of cube to spawn at first")]
+    // TODO Make it changeable via the main menu at boot
     public int numberCubes = 2;
 
-    // TODO : Remove, just for test purpose before getting the column / row of the cube
-    public int ySize;
-    public int xSize;
+    private MiniCube _miniCubeSelected;
+    public MiniCube MiniCubeSelected
+    {
+        get { return _miniCubeSelected; }
+        set {
+            // Unsellecting the previous cube if it exist
+            if (_miniCubeSelected != null)
+                _miniCubeSelected.selected = false;
 
+            if (value) {
+                _miniCubeSelected = value;
+                _miniCubeSelected.selected = true;
+                Debug.Log("MiniCube selected : " + value);
+            }
+            else {
+                Debug.LogError("Trying to set a null cube");
+            };
+        }
+    }
+
+    // Storing all our cubes here
     private List<MiniCube> _miniCubes = new List<MiniCube>();
 
     // Parent that gets rotated and get row / column of cubes as children temporarly 
     private Dictionary<string, Transform> _parentTransform = new Dictionary<string, Transform>();
 
+    // Used to make the cube rotate 90 degrees in any axe
+    private readonly Vector3 _ROTATION_CUBE = new Vector3(90f, 90f, 90f);
     // Not doing rotation while we already do one
     private bool _rotate;
 
     // TODO might move all the rotation to an other file for more clarity
     // Undo rotation
     private Stack<UndoRotation> _undoRotation = new Stack<UndoRotation>();
-    private bool _undo = true;
+    private bool _saveLastMovement = true;
 
     private class UndoRotation
     {
@@ -62,79 +84,75 @@ public class CubeManager : MonoBehaviour
             }
         }
     }
-    private void Update() {
-        // Just to test basic rotation, the drag code to touch our cubes will replace that
-        if (Input.GetKeyDown(KeyCode.A)) {
-            Rotate(new Vector2(0, ySize), Vector2.up);
-        }
 
-        if (Input.GetKeyDown(KeyCode.Z)) {
-            Rotate(new Vector2(xSize,0), Vector2.right);
-        }
-
-        if (Input.GetKeyDown(KeyCode.R)) {
-            RotateDepth(xSize, Vector3.forward);
-        }
-
-        // To test basic undo easely on editor mode.
-        if (Input.GetKeyDown(KeyCode.E)) {
-            _UndoLastRotation();
-        }
-    }
-
-    public void Rotate(Vector2 rowColumn, Vector3 direction) {
-        if (_rotate)
+    public void Rotate(Vector3 direction)
+    {
+        if (_rotate || _miniCubeSelected == null)
             return;
 
+        // Take the X, Y, Z of the cube to know which row, column and depth to rotate
+        Vector3 rowColumnDepth = Vector3.zero;
+        rowColumnDepth.x = Mathf.RoundToInt(_miniCubeSelected.transform.position.x);
+        rowColumnDepth.y = Mathf.RoundToInt(_miniCubeSelected.transform.position.y);
+        rowColumnDepth.z = Mathf.RoundToInt(_miniCubeSelected.transform.position.z);
+
+        _Rotate(rowColumnDepth, direction);
+    }
+
+    ///<summary>
+    /// Make the rotation happen by taking a direction and a column / row / depth to turn
+    /// <param name=rowColumnDepth>Vector3 taking a value to know which column, row or depth should be turned</param>
+    /// <param name=direction>Ranging from -1 to 1, to know which way to turn our element</param>
+    ///</summary>
+    private void _Rotate(Vector3 rowColumnDepth, Vector3 direction) {
+        // If already rotating, we do nothing
+        if (_rotate || _miniCubeSelected == null)
+            return;
+
+        // We create a list of mini cube that is going to be filled with the filtered ones.
         var miniCubes = new List<MiniCube>();
+
+        // To know which 
         int xyz = 0;
+
         for (int i = 0; i < _miniCubes.Count; i++) {
             // We round them to int because of floating precision issue.
             int miniCubePos;
             var miniCube = _miniCubes[i];
-            if (direction.y != 0) {
-                miniCubePos = Mathf.RoundToInt(miniCube.transform.position.y);
-                if (miniCubePos == rowColumn.y) {
-                    xyz = (int)rowColumn.y;
-                    miniCube.xyz = new Vector3Int(miniCube.xyz.x, miniCubePos, miniCube.xyz.z);
-                    miniCubes.Add(miniCube);
-                }
-            }
-            else if (direction.x != 0) {
+
+            if (direction.x != 0)
+            {
                 miniCubePos = Mathf.RoundToInt(miniCube.transform.position.x);
-                if (miniCubePos == rowColumn.x) {
-                    xyz = (int)rowColumn.x;
+                if (miniCubePos == rowColumnDepth.x)
+                {
+                    xyz = (int)rowColumnDepth.x;
                     miniCube.xyz = new Vector3Int(miniCubePos, miniCube.xyz.y, miniCube.xyz.z);
                     miniCubes.Add(miniCube);
                 }
             }
-
-        }
-
-        // TODO use the direction and not send a hardcoded vector.
-        _RotateParentCube(miniCubes, direction, xyz);
-    }
-
-
-    // TODO huge refactor needed to prevent having 3 time the same functions.
-    public void RotateDepth(int z, Vector3 direction) {
-        var miniCubeDown = new List<MiniCube>();
-
-        for (int i = 0; i < _miniCubes.Count; i++) {
-            var miniCube = _miniCubes[i];
-            // We round them to int because of floating precision issue.
-            int miniCubeDepth = Mathf.RoundToInt(miniCube.transform.position.z);
-
-            // Getting all the cubes from the same depth
-            if (miniCubeDepth == z) {
-                Debug.Log("Depth " + miniCubeDepth);
-                miniCube.xyz = new Vector3Int(miniCube.xyz.x, miniCube.xyz.y, miniCubeDepth);
-                miniCubeDown.Add(_miniCubes[i]);
+            else if (direction.y != 0)
+            {
+                miniCubePos = Mathf.RoundToInt(miniCube.transform.position.y);
+                if (miniCubePos == rowColumnDepth.y)
+                {
+                    xyz = (int)rowColumnDepth.y;
+                    miniCube.xyz = new Vector3Int(miniCube.xyz.x, miniCubePos, miniCube.xyz.z);
+                    miniCubes.Add(miniCube);
+                }
+            }
+            else if (direction.z != 0)
+            {
+                miniCubePos = Mathf.RoundToInt(miniCube.transform.position.z);
+                if (miniCubePos == rowColumnDepth.z)
+                {
+                    xyz = (int)rowColumnDepth.z;
+                    miniCube.xyz = new Vector3Int(miniCube.xyz.x, miniCube.xyz.y, miniCubePos);
+                    miniCubes.Add(miniCube);
+                }
             }
         }
 
-        // TODO use the direction and not send a hardcoded vector.
-        _RotateParentCube(miniCubeDown, direction, z);
+        _RotateParentCube(miniCubes, direction, xyz);
     }
 
     private void _RotateParentCube(List<MiniCube> miniCubeRotation, Vector3 direction, int xyz) {
@@ -156,28 +174,29 @@ public class CubeManager : MonoBehaviour
         if (_parentTransform.TryGetValue(parentName, out parentTransform)) {
 
             // Settings our parents for all the childs that we got
-            // TODO : Refactor to get that throught LINQ.
             for (int i = 0; i < miniCubeRotation.Count; i++) {
                 miniCubeRotation[i].transform.parent = parentTransform.transform;
             }
 
-            Vector3 rotationValue = Vector3.Scale(direction, new Vector3(90, 90, 90));
-            rotationValue += parentTransform.localEulerAngles;
+            // Only one direction is set at the time, so 90 * 1 or -1 gives the value, the rest becomes 0
+            Vector3 rotationValue = Vector3.Scale(direction, _ROTATION_CUBE);
+            float rotationAngle = rotationValue.x + rotationValue.y + rotationValue.z;
 
             _rotate = true;
 
-            LeanTween.rotate(parentTransform.gameObject, rotationValue, 0.5f)
+            LeanTween.rotateAround(parentTransform.gameObject, direction, _ROTATION_CUBE.x, 0.5f)
             .setOnComplete(() => {
+                // We unparent the cubes and unblock the rotation
                 for (int i = 0; i < miniCubeRotation.Count; i++) {
                     miniCubeRotation[i].transform.parent = null;
                 }
                 _rotate = false;
             });
-
-            if (_undo)
+            
+            // If we want to save the last movement
+            if (_saveLastMovement)
                 _SaveLastMovement(direction, xyz);
         }
-        
     }
 
     ///<summary>
@@ -215,7 +234,6 @@ public class CubeManager : MonoBehaviour
             _parentTransform.Add(parentRotationY.name, parentRotationY.transform);
             _parentTransform.Add(parentRotationZ.name, parentRotationZ.transform);
         }
-
     }
 
     ///<summary>
@@ -232,26 +250,30 @@ public class CubeManager : MonoBehaviour
     ///<summary>
     /// Undo the last movement done by the player by inverting the last direction
     ///</summary>
-    private void _UndoLastRotation() {
+    public void UndoLastRotation() {
         // Stack is empty, no need to undo
         if (_undoRotation.Count == 0)
+        {
+            Debug.Log("Stack empty no more undo to do");
             return;
+        }
 
         var undoRotation = _undoRotation.Pop();
 
         // We invert the direction
         undoRotation.direction *= - 1;
+
         // TODO maybe a more elegant way of preventing a save while undoing
-        _undo = false;
+        _saveLastMovement = false;
 
         // Direction tell us if it's horitonzal / vertical movement
         if (Mathf.Abs(undoRotation.direction.x) > 0)
-            Rotate(new Vector2(undoRotation.columnRowDepth, 0), undoRotation.direction);
+            _Rotate(new Vector3(undoRotation.columnRowDepth, 0, 0), undoRotation.direction);
         else if (Mathf.Abs(undoRotation.direction.y) > 0)
-            Rotate(new Vector2(undoRotation.columnRowDepth, 0), undoRotation.direction);
+            _Rotate(new Vector3(0, undoRotation.columnRowDepth, 0), undoRotation.direction);
         else if (Mathf.Abs(undoRotation.direction.z) > 0)
-            RotateDepth((int)undoRotation.columnRowDepth, undoRotation.direction);
+            _Rotate(new Vector3(0, 0, undoRotation.columnRowDepth), undoRotation.direction);
 
-        _undo = true;
+        _saveLastMovement = true;
     }
 }

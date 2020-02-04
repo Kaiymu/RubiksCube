@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641258, b: 0.5748172, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -206,7 +206,7 @@ MonoBehaviour:
     serializedVersion: 2
     rgba: 4278190080
   m_fontSize: 17.9
-  m_fontSizeBase: 24
+  m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 12
@@ -819,8 +819,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   miniCube: {fileID: 7616513349470255759, guid: 713f9c295d18c4142a2bdc0eb2f16369,
     type: 3}
-  numberCubes: 6
-  faceList: []
+  facePrefab: {fileID: 8614213615077702617, guid: 991c86abbccc26847ba036d4cbaf5270,
+    type: 3}
+  numberCubes: 2
 --- !u!1 &610287562
 GameObject:
   m_ObjectHideFlags: 0
@@ -2529,7 +2530,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 83.8, y: -25.7}
+  m_AnchoredPosition: {x: 83.80078, y: -25.7}
   m_SizeDelta: {x: 133.47, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1891491862

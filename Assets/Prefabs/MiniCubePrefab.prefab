@@ -168,7 +168,7 @@ GameObject:
   - component: {fileID: 6342059846357828862}
   - component: {fileID: 7616513349470255759}
   m_Layer: 8
-  m_Name: MiniCube
+  m_Name: MiniCubePrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -247,7 +247,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6342059846357828833}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}

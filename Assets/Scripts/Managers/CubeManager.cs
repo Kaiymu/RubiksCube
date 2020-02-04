@@ -7,6 +7,10 @@ public class CubeManager : MonoBehaviour
 {
     [Header("Mini cube prefab")]
     public MiniCube miniCube;
+
+    [Header("Mini cube prefab")]
+    public Face facePrefab;
+
     [Header("Number of cube to spawn at first")]
     // TODO Make it changeable via the main menu at boot
     public int numberCubes = 2;
@@ -51,7 +55,7 @@ public class CubeManager : MonoBehaviour
     private bool _saveLastMovement = true;
 
     // TODO might put it global and constant
-    private List<Vector3> _faceList = new List<Vector3>();
+    private Dictionary<Vector3, Vector3> _faceList = new Dictionary<Vector3, Vector3>();
     public enum COLORS { NONE, GREEN, YELLOW, RED, WHITE, BLUE, ORANGE }
 
     private class UndoRotation
@@ -114,28 +118,35 @@ public class CubeManager : MonoBehaviour
     private void _CreatingFaces() {
 
         // TODO might put that globally to be also used by the MiniCube elements
-        _faceList.Add(Vector3.forward);
-        _faceList.Add(Vector3.back);
-        _faceList.Add(Vector3.up);
-        _faceList.Add(Vector3.down);
-        _faceList.Add(Vector3.right);
-        _faceList.Add(Vector3.left);
+        Vector3 frontFace = Vector3.Lerp(new Vector3(0, 0, 0), new Vector3(numberCubes - 1, numberCubes - 1, -0.5f), 0.5f); ; // Front face
+        Vector3 backwardFace = Vector3.Lerp(new Vector3(0, 0, 0), new Vector3(numberCubes - 1, numberCubes - 1, (numberCubes * 2) - 1.5f), 0.5f); // Backward face
+        Vector3 upFace = Vector3.Lerp(new Vector3(0, 0, 0), new Vector3(numberCubes - 1, (numberCubes * 2) - 1.5f, numberCubes - 1f), 0.5f); // Top Face
+        Vector3 downFace = Vector3.Lerp(new Vector3(0, 0, 0), new Vector3(numberCubes - 1, -0.5f, numberCubes - 1), 0.5f); // Down face
+        Vector3 rightFace = Vector3.Lerp(new Vector3(0, 0, 0), new Vector3(-0.5f, numberCubes - 1, numberCubes - 1), 0.5f); // Right face
+        Vector3 leftFace = Vector3.Lerp(new Vector3(0, 0, 0), new Vector3((numberCubes* 2) -1.5f, numberCubes - 1, numberCubes - 1), 0.5f); // Left face
+
+        _faceList.Add(Vector3.forward, frontFace);
+        _faceList.Add(Vector3.back, backwardFace);
+        _faceList.Add(Vector3.up, upFace);
+        _faceList.Add(Vector3.down, downFace);
+        _faceList.Add(Vector3.right, rightFace);
+        _faceList.Add(Vector3.left, leftFace);
 
         var parentGameobjectFace = new GameObject();
         parentGameobjectFace.name = "[FACE PARENT]";
 
-        for (int i = 0; i < _faceList.Count; i++)
-        {
-            var faceObject = new GameObject();
-            var face = faceObject.AddComponent<Face>();
+
+        foreach(var faceElement in _faceList) {
+            var face = Instantiate(facePrefab, Vector3.zero, Quaternion.identity);
             face.transform.parent = parentGameobjectFace.transform;
-            face.transform.forward = _faceList[i];
-            face.name = "Face : " + _faceList[i];
-            _faces.Add(_faceList[i], face);
+            face.transform.position = faceElement.Value;
+            face.transform.localScale = new Vector3(numberCubes, numberCubes, 0.5f);
+            face.transform.forward = faceElement.Key;
+            face.name = "Face : " + faceElement.Key;
+            _faces.Add(faceElement.Key, face);
         }
 
-        
-        for(int i = 0; i < _miniCubes.Count; i++)
+        for (int i = 0; i < _miniCubes.Count; i++)
         {
             var miniCube = _miniCubes[i];
 

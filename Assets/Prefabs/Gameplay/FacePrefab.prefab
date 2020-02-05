@@ -18,7 +18,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7886407802706910062
 Transform:
   m_ObjectHideFlags: 0
@@ -45,7 +45,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ffa2d892175a8944be94ad0ac6be1dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  faceCube: []
 --- !u!65 &7977191339131266641
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -55,7 +54,7 @@ BoxCollider:
   m_GameObject: {fileID: 5006890632900559880}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}

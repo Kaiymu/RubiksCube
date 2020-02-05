@@ -54,7 +54,7 @@ public class GameManager : MonoBehaviour
         }
 
         DontDestroyOnLoad(this);
-
+        numberFaceVictory = 0;
         _CreateCenterOfCube();
     }
 
@@ -80,21 +80,24 @@ public class GameManager : MonoBehaviour
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
-        if (scene.buildIndex == 0) { 
+        if (scene.buildIndex == 0) {
+            ClearData();
             gameState = GAME_STATE.MAIN_MENU;
         }
 
         if (scene.buildIndex == 1)
         {
+            numberFaceVictory = 0;
             // If no data is found, we load the game as "Scrambled", which means that it's going to start
-            if(DatasManager.Instance == null)
+            if (DatasManager.Instance == null)
             {
                 gameState = GAME_STATE.SCRAMBLED;
                 return;
             }
 
+            _seconds = 0f;
             // If data exist, but it's empty, we just start the new game
-            if(DatasManager.Instance.cubeSaveContainer.miniCubeSaveList.Count == 0)
+            if (DatasManager.Instance.cubeSaveContainer.miniCubeSaveList.Count == 0)
                 gameState = GAME_STATE.SCRAMBLED;
             else if (DatasManager.Instance.cubeSaveContainer.miniCubeSaveList.Count > 0) {
                 _seconds = DatasManager.Instance.cubeSaveContainer.timerInSeconds;
@@ -123,7 +126,16 @@ public class GameManager : MonoBehaviour
 
         if (NUMBER_FACE_VICTORY == numberFaceVictory)
         {
-            _gameState = GAME_STATE.WIN;
+            gameState = GAME_STATE.WIN;
+        }
+    }
+
+    public void ClearData()
+    {
+        if (DatasManager.Instance != null)
+        {
+            DatasManager.Instance.cubeSaveContainer.timerInSeconds = 0f;
+            DatasManager.Instance.cubeSaveContainer.miniCubeSaveList.Clear();
         }
     }
 

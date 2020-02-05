@@ -37,7 +37,7 @@ public class Face : MonoBehaviour
         // Check if they all have the same forward.
         for (int i = 0; i < _faceCube.Count; i++)
         {
-            var forwardCube = _faceCube[i].transform.forward;
+            var forwardCube = _faceCube[i].transform.eulerAngles;
 
             // If the face have the cube all facing the same direction, it seems the face as the same color
             if (tempFwdValue == Vector3.zero)
@@ -60,7 +60,9 @@ public class Face : MonoBehaviour
     }
 
     public void ResetColliders() {
-        _boxCollider.enabled = false;
+        if(_boxCollider != null)
+            _boxCollider.enabled = false;
+
         _faceCube.Clear();
     }
 

@@ -168,7 +168,7 @@ public class CubeManager : MonoBehaviour
     {
         MiniCube newMiniCube = Instantiate(miniCube, position, Quaternion.Euler(rotation));
         newMiniCube.xyz = position;
-        newMiniCube.transform.parent = _miniCubeParent.transform;
+        newMiniCube.transform.parent = null;
         _miniCubes.Add(newMiniCube);
     }
 
@@ -308,6 +308,8 @@ public class CubeManager : MonoBehaviour
             face.transform.forward = faceElement.Key;
             face.name = "Face : " + faceElement.Key;
             _faces.Add(faceElement.Key, face);
+
+            face.gameObject.SetActive(true);
         }
 
         // Removing the temporary dictionnary
@@ -458,7 +460,7 @@ public class CubeManager : MonoBehaviour
                 // We unparent the cubes and unblock the rotation
                 _canRotate = true;
                 for (int i = 0; i < miniCubeRotation.Count; i++) {
-                    miniCubeRotation[i].transform.parent = _miniCubeParent.transform;
+                    miniCubeRotation[i].transform.parent = null;
                 }
 
                 if (GameManager.Instance.gameState == GameManager.GAME_STATE.SCRAMBLED) {

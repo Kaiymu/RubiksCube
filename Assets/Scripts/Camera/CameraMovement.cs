@@ -18,11 +18,10 @@ public class CameraMovement : MonoBehaviour
     private void Update() {
         if (GameManager.Instance.gameState == GameManager.GAME_STATE.WIN)
         {
-
+            transform.RotateAround(_rotateAround.transform.position, Vector3.up, Time.deltaTime * speedMovement);
         }
         else
         {
-
             transform.RotateAround(_rotateAround.transform.position, InputManager.Instance._RotateMobile(miniMalValueDir), Time.deltaTime * speedMovement);
         }
     }

@@ -71,16 +71,20 @@ public class CubeManager : MonoBehaviour
     private void Awake() {
         if (Instance == null)
             Instance = this;
+    }
 
+    private void Start() {
         _CreateMiniCubes();
         _CreateParentRotation();
+        _AddRandomDirectionColumnRowDepth();
     }
 
     ///<summary>
     /// Create our cubes and add them inside our list.
     /// Each cubes will have a set of basic position, we assume they are 1x1x1 on scale.
     ///</summary>
-    private void _CreateMiniCubes() {
+    private void _CreateMiniCubes()
+    {
         // Because of floating point imprecision i'd rather use int that floats
         Vector3Int cubePosition = Vector3Int.zero;
         _numberCubes = GameManager.Instance.numberCube;
@@ -88,10 +92,11 @@ public class CubeManager : MonoBehaviour
         _miniCubeParent = new GameObject();
         _miniCubeParent.name = "[MINI CUBE PARENT]";
 
-        if (DatasManager.Instance.cubeSaveContainer.miniCubeSaveList.Count > 0)
+        if (DatasManager.Instance != null &&DatasManager.Instance.cubeSaveContainer.miniCubeSaveList.Count > 0)
         {
             _LoadCubes();
-        } else
+        }
+        else
         {
             _CreateCubeFromScratch();
         }
@@ -122,8 +127,8 @@ public class CubeManager : MonoBehaviour
                 {
 
                     // Not creating mini cubes that are "inside" the cube and that the player cannot see
-                    if ((k > 0 && k < _numberCubes - 1) && 
-                        (j > 0 && j < _numberCubes - 1) && 
+                    if ((k > 0 && k < _numberCubes - 1) &&
+                        (j > 0 && j < _numberCubes - 1) &&
                         (i > 0 && i < _numberCubes - 1))
                     {
                         continue;
@@ -149,12 +154,14 @@ public class CubeManager : MonoBehaviour
     /// They're used as temporary pivot point for our MiniCubes
     /// We can access these parents throught a Dictionnary
     ///</summary>
-    private void _CreateParentRotation() {
+    private void _CreateParentRotation()
+    {
 
         var parentColumnRowDepth = new GameObject();
         parentColumnRowDepth.name = "[PARENT COLUMN ROW DEPTH]";
 
-        for (int i = 0; i < _numberCubes; i++) {
+        for (int i = 0; i < _numberCubes; i++)
+        {
             // We get the middle position of our farthest cubes in the current vertical row.
             Vector3 positionVerticalParent = Vector3.Lerp(new Vector3(0, i, 0), new Vector3(_numberCubes - 1, i, _numberCubes - 1), 0.5f);
             Vector3 positionHorizontalParent = Vector3.Lerp(new Vector3(i, 0, 0), new Vector3(i, _numberCubes - 1, _numberCubes - 1), 0.5f);
@@ -188,13 +195,8 @@ public class CubeManager : MonoBehaviour
         }
     }
 
-    private void Start() {
-        _CreateScrambledRubikCubes();
-    }
-
-    private void _CreateScrambledRubikCubes() {
+    private void _AddRandomDirectionColumnRowDepth() {
         if (GameManager.Instance.gameState == GameManager.GAME_STATE.SCRAMBLED) {
-            Debug.LogError("Scrambled");
             Vector3 randomDirection;
             Vector3Int randomRowColumnDepth;
             Rotation randomRotation;
@@ -380,6 +382,12 @@ public class CubeManager : MonoBehaviour
         _RotateParentCube(miniCubes, direction, rowColumnDepth);
     }
 
+
+    ///<summary>
+    /// Get the parent row / column / depth that we target, parent all the child, and make it turn around
+    /// <param name=rowColumnDepth>Vector3 taking a value to know which column, row or depth should be turned</param>
+    /// <param name=direction>Ranging from -1 to 1, to know which way to turn our element</param>
+    ///</summary>
     private void _RotateParentCube(List<MiniCube> miniCubeRotation, Vector3 direction, Vector3Int xyz) {
 
         Transform parentTransform = null;
@@ -434,20 +442,34 @@ public class CubeManager : MonoBehaviour
 
                 if (GameManager.Instance.gameState == GameManager.GAME_STATE.PLAYING) {
 
+                    bool dataManagerExist = DatasManager.Instance;
+
                     DatasManager.MiniCubeDataSave miniCubeDataSave;
-                    DatasManager.Instance.cubeSaveContainer.miniCubeSaveList.Clear();
+                    if (dataManagerExist)
+                    {
+                        DatasManager.Instance.cubeSaveContainer.miniCubeSaveList.Clear();
+                    }
+
                     for (int i = 0; i < _miniCubes.Count; i++)
                     {
                         var miniCube = _miniCubes[i];
-                        miniCubeDataSave = new DatasManager.MiniCubeDataSave();
-                        miniCubeDataSave.cubePosition = GetCubePosition(miniCube);
-                        miniCubeDataSave.cubeRotation = GetCubeRotation(miniCube);
-                        DatasManager.Instance.cubeSaveContainer.miniCubeSaveList.Add(miniCubeDataSave);
+                        if (dataManagerExist)
+                        {
+                            // Filling datas manager with new cube datas
+                            miniCubeDataSave = new DatasManager.MiniCubeDataSave();
+                            miniCubeDataSave.cubePosition = GetCubePosition(miniCube);
+                            miniCubeDataSave.cubeRotation = GetCubeRotation(miniCube);
+                            DatasManager.Instance.cubeSaveContainer.miniCubeSaveList.Add(miniCubeDataSave);
+                        }
                     }
 
-                    // Saving the new cubes with updated rotation
-                    DatasManager.Instance.SaveMiniCube();
+                    if (dataManagerExist)
+                    {
+                        // Saving the new cubes with updated rotation
+                        DatasManager.Instance.SaveMiniCube();
+                    }
 
+                    // Activating colliders on the faces element
                     foreach (var face in _faces) {
                         face.Value.ActivateColliders();
                     }

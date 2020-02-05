@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,6 +23,9 @@ namespace Rubiks.UI
 
         [Header("Undo button")]
         public Button undoButton;
+
+        [Header("Timer ")]
+        public TextMeshProUGUI timerText;
 
         private void Awake()
         {
@@ -58,6 +63,12 @@ namespace Rubiks.UI
             {
                 CubeManager.Instance.UndoLastRotation();
             });
+        }
+
+        public void Update()
+        {
+            string timeSpanFormatted = GameManager.Instance.TimerSecond.ToString("mm\\:ss");
+            timerText.text = "Time : " + timeSpanFormatted;
         }
     }
 }

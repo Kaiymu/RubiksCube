@@ -10,6 +10,7 @@ public partial class DatasManager : MonoBehaviour
     [Serializable]
     public class MiniCubeSave
     {
+        public float timerInSeconds;
         public List<MiniCubeDataSave> miniCubeSaveList = new List<MiniCubeDataSave>();
     }
 

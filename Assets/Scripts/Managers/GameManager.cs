@@ -33,7 +33,8 @@ public class GameManager : MonoBehaviour
     public int numberFaceVictory = 0;
 
     [Header("Number of random direction and positive that the cubes will do before starting the game")]
-    public int numberRandomScramble = 10;
+    [Range(10, 100)]
+    public int numberRandomScramble = 20;
 
     private float _seconds = 0;
 

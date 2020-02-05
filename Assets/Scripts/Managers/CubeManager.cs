@@ -168,7 +168,7 @@ public class CubeManager : MonoBehaviour
     {
         MiniCube newMiniCube = Instantiate(miniCube, position, Quaternion.Euler(rotation));
         newMiniCube.xyz = position;
-        newMiniCube.transform.parent = null;
+        newMiniCube.transform.parent = _miniCubeParent.transform;
         _miniCubes.Add(newMiniCube);
     }
 
@@ -460,7 +460,7 @@ public class CubeManager : MonoBehaviour
                 // We unparent the cubes and unblock the rotation
                 _canRotate = true;
                 for (int i = 0; i < miniCubeRotation.Count; i++) {
-                    miniCubeRotation[i].transform.parent = null;
+                    miniCubeRotation[i].transform.parent = _miniCubeParent.transform;
                 }
 
                 if (GameManager.Instance.gameState == GameManager.GAME_STATE.SCRAMBLED) {

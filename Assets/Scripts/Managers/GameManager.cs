@@ -50,7 +50,7 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
             Instance = this;
         else {
-            Destroy(gameObject);
+            Destroy(gameObject.GetComponent<GameManager>());
         }
 
         DontDestroyOnLoad(this);
@@ -87,6 +87,7 @@ public class GameManager : MonoBehaviour
 
         if (scene.buildIndex == 1)
         {
+            _CreateCenterOfCube();
             numberFaceVictory = 0;
             // If no data is found, we load the game as "Scrambled", which means that it's going to start
             if (DatasManager.Instance == null)
@@ -103,8 +104,6 @@ public class GameManager : MonoBehaviour
                 _seconds = DatasManager.Instance.cubeSaveContainer.timerInSeconds;
                 gameState = GAME_STATE.PLAYING;
             }
-
-            _CreateCenterOfCube();
         }
     }
 

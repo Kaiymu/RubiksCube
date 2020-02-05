@@ -14,7 +14,15 @@ public class GameManager : MonoBehaviour
     }
 
     public enum GAME_STATE { SCRAMBLED, PLAYING, WIN, MAIN_MENU }
-    public GAME_STATE gameState = GAME_STATE.SCRAMBLED;
+
+    private GAME_STATE _gameState = GAME_STATE.MAIN_MENU;
+    public GAME_STATE gameState
+    {
+        get { return _gameState; }
+        set { Debug.Log("Game manager goes from state : " + _gameState + " to : " + value);
+            _gameState = value; }
+    }
+
 
     [Header("Number of cube to spawn X*X*X")]
     [Range(2, 6)]

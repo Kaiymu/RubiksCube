@@ -25,9 +25,8 @@ public class CubeManager : MonoBehaviour
             if (_miniCubeSelected != null)
                 _miniCubeSelected.selected = false;
 
-            _miniCubeSelected = value;
-
             if (value) {
+                _miniCubeSelected = value;
                 _miniCubeSelected.selected = true;
                 Debug.Log("MiniCube selected : " + value);
             }

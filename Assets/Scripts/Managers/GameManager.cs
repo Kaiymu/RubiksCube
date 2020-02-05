@@ -37,26 +37,20 @@ public class GameManager : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    // TODO not keeping the scene logic here, might create a SceneManager for that, only for test purpose for now
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
-        if(scene.name == "SampleScene") {
-            gameState = GAME_STATE.SCRAMBLED;
-            _CreateCenterOfCube();
-        }
-
-        if (scene.name == "MenuScene") {
-            gameState = GAME_STATE.MAIN_MENU;
-        }
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    // TODO To remove, only for test purpose
-    private void Update() {
-        if (Input.GetKeyDown(KeyCode.A)) {
-            SceneManager.LoadScene(1);
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
+        if (scene.buildIndex == 0) { 
+            gameState = GAME_STATE.MAIN_MENU;
         }
 
-        if (Input.GetKeyDown(KeyCode.Z)) {
-            SceneManager.LoadScene(0);
+        if (scene.buildIndex == 1)
+        {
+            gameState = GAME_STATE.SCRAMBLED;
+            _CreateCenterOfCube();
         }
     }
 

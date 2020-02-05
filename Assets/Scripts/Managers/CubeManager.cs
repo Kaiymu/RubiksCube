@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class CubeManager : MonoBehaviour
@@ -398,6 +396,7 @@ public class CubeManager : MonoBehaviour
     }
 
     #endregion
+
     #region UNDO
     ///<summary>
     /// Save the last movement done by the player

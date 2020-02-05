@@ -75,7 +75,8 @@ public class GameManager : MonoBehaviour
         if (_gameState == GAME_STATE.PLAYING)
         {
             _seconds += Time.deltaTime;
-            DatasManager.Instance.cubeSaveContainer.timerInSeconds = _seconds;
+            if(DatasManager.Instance != null)
+                DatasManager.Instance.cubeSaveContainer.timerInSeconds = _seconds;
         }
     }
 

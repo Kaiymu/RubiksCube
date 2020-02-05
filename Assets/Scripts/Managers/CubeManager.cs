@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class CubeManager : MonoBehaviour
 {
@@ -11,10 +12,12 @@ public class CubeManager : MonoBehaviour
 
     private int _numberCubes = 2;
 
+    private const string MINI_CUBE_LAYER_MASK = "MiniCube";
+
     private MiniCube _miniCubeSelected;
     private GameObject _miniCubeParent;
 
-    public MiniCube MiniCubeSelected
+    private MiniCube _MiniCubeSelected
     {
         get { return _miniCubeSelected; }
         set {
@@ -22,13 +25,14 @@ public class CubeManager : MonoBehaviour
             if (_miniCubeSelected != null)
                 _miniCubeSelected.selected = false;
 
+            _miniCubeSelected = value;
+
             if (value) {
-                _miniCubeSelected = value;
                 _miniCubeSelected.selected = true;
                 Debug.Log("MiniCube selected : " + value);
             }
             else {
-                Debug.LogError("Trying to set a null cube");
+                Debug.LogError("Setting the cube to null");
             };
         }
     }
@@ -77,6 +81,26 @@ public class CubeManager : MonoBehaviour
         _CreateMiniCubes();
         _CreateParentRotation();
         _AddRandomDirectionColumnRowDepth();
+    }
+
+    private void Update()
+    {
+        if(InputManager.Instance.GetMouseOrTouchBegin())
+        {
+            if (EventSystem.current.IsPointerOverGameObject())
+                return;
+            
+            var cubeFound = RaycastingMask(MINI_CUBE_LAYER_MASK);
+
+            if(cubeFound != null)
+            {
+                _MiniCubeSelected = cubeFound.GetComponent<MiniCube>();
+            } else
+            {
+                // If we clicked elsewhere
+                _MiniCubeSelected = null;
+            }
+        }
     }
 
     ///<summary>
@@ -521,6 +545,27 @@ public class CubeManager : MonoBehaviour
         _Rotate(undoRotation.columnRowDepth, undoRotation.direction);
 
         _saveLastMovement = true;
+    }
+    #endregion
+
+    #region HELPER 
+    ///<summary>
+    /// We fire a raycast from the input (Mouse / Touch) position, if we touch a MiniCube, we store it.
+    ///</summary>
+    ///
+    public Transform RaycastingMask(string layerMask)
+    {
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        int layerMaskToFind = LayerMask.GetMask(layerMask);
+
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMaskToFind))
+        {
+            return hit.transform;
+        }
+
+        return null;
     }
     #endregion
 }

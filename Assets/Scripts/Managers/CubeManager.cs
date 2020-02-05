@@ -62,7 +62,7 @@ public class CubeManager : MonoBehaviour
     private class Rotation
     {
         public Vector3 direction = Vector3.zero;
-        public Vector3 columnRowDepth = Vector3.zero;
+        public Vector3Int columnRowDepth = Vector3Int.zero;
     }
 
     public static CubeManager Instance;
@@ -88,31 +88,60 @@ public class CubeManager : MonoBehaviour
         _miniCubeParent = new GameObject();
         _miniCubeParent.name = "[MINI CUBE PARENT]";
 
-        for (int i = 0; i < _numberCubes; i++) {
-            for (int j = 0; j < _numberCubes; j++) {
-                for (int k = 0; k < _numberCubes; k++) {
-                    
+        if (DatasManager.Instance.cubeSaveContainer.miniCubeSaveList.Count > 0)
+        {
+            _LoadCubes();
+        } else
+        {
+            _CreateCubeFromScratch();
+        }
+
+        _CreatingFaces();
+    }
+
+    private void _LoadCubes()
+    {
+        var cubeContainerLoaded = DatasManager.Instance.cubeSaveContainer;
+
+        for (int i = 0; i < cubeContainerLoaded.miniCubeSaveList.Count; i++)
+        {
+            var cubeInfo = cubeContainerLoaded.miniCubeSaveList[i];
+            _InstantiateMiniCubes(cubeInfo.cubePosition, cubeInfo.cubeRotation);
+        }
+    }
+
+    private void _CreateCubeFromScratch()
+    {
+        Vector3Int cubePosition = Vector3Int.zero;
+
+        for (int i = 0; i < _numberCubes; i++)
+        {
+            for (int j = 0; j < _numberCubes; j++)
+            {
+                for (int k = 0; k < _numberCubes; k++)
+                {
+
                     // Not creating mini cubes that are "inside" the cube and that the player cannot see
-                    if((k > 0 && k < _numberCubes - 1) &&
-                        (j > 0 && j < _numberCubes - 1) &&
-                            (i > 0 && i < _numberCubes - 1))
+                    if ((k > 0 && k < _numberCubes - 1) && 
+                        (j > 0 && j < _numberCubes - 1) && 
+                        (i > 0 && i < _numberCubes - 1))
                     {
                         continue;
                     }
 
-
                     cubePosition = new Vector3Int(k, j, i);
-                    MiniCube newMiniCube = Instantiate(miniCube, cubePosition, Quaternion.identity);
-                    newMiniCube.xyz = cubePosition;
-                    newMiniCube.transform.position = cubePosition;
-                    newMiniCube.transform.parent = _miniCubeParent.transform;
-                    _miniCubes.Add(newMiniCube);
-
+                    _InstantiateMiniCubes(cubePosition, Vector3Int.zero);
                 }
             }
         }
+    }
 
-        _CreatingFaces();
+    private void _InstantiateMiniCubes(Vector3Int position, Vector3Int rotation)
+    {
+        MiniCube newMiniCube = Instantiate(miniCube, position, Quaternion.Euler(rotation));
+        newMiniCube.xyz = position;
+        newMiniCube.transform.parent = _miniCubeParent.transform;
+        _miniCubes.Add(newMiniCube);
     }
 
     ///<summary>
@@ -165,8 +194,9 @@ public class CubeManager : MonoBehaviour
 
     private void _CreateScrambledRubikCubes() {
         if (GameManager.Instance.gameState == GameManager.GAME_STATE.SCRAMBLED) {
+            Debug.LogError("Scrambled");
             Vector3 randomDirection;
-            Vector3 randomRowColumnDepth;
+            Vector3Int randomRowColumnDepth;
             Rotation randomRotation;
 
             for (int i = 0; i < GameManager.Instance.numberRandomScramble; i++) {
@@ -187,7 +217,7 @@ public class CubeManager : MonoBehaviour
                     randomDirection.z =randomDirectionExcludeZero;
                 }
 
-                randomRowColumnDepth = new Vector3(Random.Range(0, _numberCubes), Random.Range(0, _numberCubes), Random.Range(0, _numberCubes));
+                randomRowColumnDepth = new Vector3Int(Random.Range(0, _numberCubes), Random.Range(0, _numberCubes), Random.Range(0, _numberCubes));
 
                 randomRotation = new Rotation();
                 randomRotation.direction = randomDirection;
@@ -272,12 +302,32 @@ public class CubeManager : MonoBehaviour
             return;
 
         // Take the X, Y, Z of the cube to know which row, column and depth to rotate
-        Vector3 rowColumnDepth = Vector3.zero;
-        rowColumnDepth.x = Mathf.RoundToInt(_miniCubeSelected.transform.position.x);
-        rowColumnDepth.y = Mathf.RoundToInt(_miniCubeSelected.transform.position.y);
-        rowColumnDepth.z = Mathf.RoundToInt(_miniCubeSelected.transform.position.z);
 
-        _Rotate(rowColumnDepth, direction);
+        _Rotate(GetCubePosition(), direction);
+    }
+
+    private Vector3Int GetCubePosition(MiniCube miniCubePos = null)
+    {
+        if (miniCubePos == null)
+            miniCubePos = _miniCubeSelected;
+
+        Vector3Int rowColumnDepth = Vector3Int.zero;
+        rowColumnDepth.x = Mathf.RoundToInt(miniCubePos.transform.position.x);
+        rowColumnDepth.y = Mathf.RoundToInt(miniCubePos.transform.position.y);
+        rowColumnDepth.z = Mathf.RoundToInt(miniCubePos.transform.position.z);
+        return rowColumnDepth;
+    }
+
+    private Vector3Int GetCubeRotation(MiniCube miniCubePos = null)
+    {
+        if (miniCubePos == null)
+            miniCubePos = _miniCubeSelected;
+
+        Vector3Int rowColumnDepth = Vector3Int.zero;
+        rowColumnDepth.x = Mathf.RoundToInt(miniCubePos.transform.eulerAngles.x);
+        rowColumnDepth.y = Mathf.RoundToInt(miniCubePos.transform.eulerAngles.y);
+        rowColumnDepth.z = Mathf.RoundToInt(miniCubePos.transform.eulerAngles.z);
+        return rowColumnDepth;
     }
 
     ///<summary>
@@ -285,7 +335,7 @@ public class CubeManager : MonoBehaviour
     /// <param name=rowColumnDepth>Vector3 taking a value to know which column, row or depth should be turned</param>
     /// <param name=direction>Ranging from -1 to 1, to know which way to turn our element</param>
     ///</summary>
-    private void _Rotate(Vector3 rowColumnDepth, Vector3 direction) {
+    private void _Rotate(Vector3Int rowColumnDepth, Vector3 direction) {
         // If already rotating, we do nothing
         if (!_canRotate)
             return;
@@ -330,7 +380,7 @@ public class CubeManager : MonoBehaviour
         _RotateParentCube(miniCubes, direction, rowColumnDepth);
     }
 
-    private void _RotateParentCube(List<MiniCube> miniCubeRotation, Vector3 direction, Vector3 xyz) {
+    private void _RotateParentCube(List<MiniCube> miniCubeRotation, Vector3 direction, Vector3Int xyz) {
 
         Transform parentTransform = null;
 
@@ -383,6 +433,21 @@ public class CubeManager : MonoBehaviour
                 }
 
                 if (GameManager.Instance.gameState == GameManager.GAME_STATE.PLAYING) {
+
+                    DatasManager.MiniCubeDataSave miniCubeDataSave;
+                    DatasManager.Instance.cubeSaveContainer.miniCubeSaveList.Clear();
+                    for (int i = 0; i < _miniCubes.Count; i++)
+                    {
+                        var miniCube = _miniCubes[i];
+                        miniCubeDataSave = new DatasManager.MiniCubeDataSave();
+                        miniCubeDataSave.cubePosition = GetCubePosition(miniCube);
+                        miniCubeDataSave.cubeRotation = GetCubeRotation(miniCube);
+                        DatasManager.Instance.cubeSaveContainer.miniCubeSaveList.Add(miniCubeDataSave);
+                    }
+
+                    // Saving the new cubes with updated rotation
+                    DatasManager.Instance.SaveMiniCube();
+
                     foreach (var face in _faces) {
                         face.Value.ActivateColliders();
                     }
@@ -402,7 +467,7 @@ public class CubeManager : MonoBehaviour
     /// Save the last movement done by the player
     /// Taking direction and row / column as parameter
     ///</summary>
-    private void _SaveLastMovement(Vector3 direction, Vector3 xyz) {
+    private void _SaveLastMovement(Vector3 direction, Vector3Int xyz) {
         Rotation undoRotation = new Rotation();
         undoRotation.direction = direction;
         undoRotation.columnRowDepth = xyz;

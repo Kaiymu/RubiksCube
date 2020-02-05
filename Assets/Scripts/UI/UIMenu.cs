@@ -24,6 +24,7 @@ public class UIMenu : MonoBehaviour
     public void LoadLevel(int numberCube)
     {
         GameManager.Instance.numberCube = numberCube;
+        DatasManager.Instance.LoadMiniCube();
         SceneManager.LoadScene(1);
     }
 }

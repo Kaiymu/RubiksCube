@@ -49,20 +49,22 @@ public class GameManager : MonoBehaviour
 
         if (scene.buildIndex == 1)
         {
-            gameState = GAME_STATE.SCRAMBLED;
+            if(DatasManager.Instance.cubeSaveContainer.miniCubeSaveList.Count == 0)
+                gameState = GAME_STATE.SCRAMBLED;
+            else if (DatasManager.Instance.cubeSaveContainer.miniCubeSaveList.Count > 0) {
+                gameState = GAME_STATE.PLAYING;
+            }
+
             _CreateCenterOfCube();
         }
     }
 
     private void _CreateCenterOfCube() {
-        if(gameState != GAME_STATE.MAIN_MENU) {
-
-            float centerOfCubeValue = (numberCube - 1) / 2f;
-            Vector3 centerOfCubePos = new Vector3(centerOfCubeValue, centerOfCubeValue, centerOfCubeValue);
-            _centerOfCube = new GameObject();
-            _centerOfCube.name = "[CENTER OF CUBE]";
-            _centerOfCube.transform.position = centerOfCubePos;
-        }
+        float centerOfCubeValue = (numberCube - 1) / 2f;
+        Vector3 centerOfCubePos = new Vector3(centerOfCubeValue, centerOfCubeValue, centerOfCubeValue);
+        _centerOfCube = new GameObject();
+        _centerOfCube.name = "[CENTER OF CUBE]";
+        _centerOfCube.transform.position = centerOfCubePos;
     }
 
 }

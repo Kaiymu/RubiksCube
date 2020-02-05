@@ -1355,6 +1355,7 @@ GameObject:
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
   - component: {fileID: 963194231}
+  - component: {fileID: 963194229}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1427,6 +1428,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &963194229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963194225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad8fedd54ded49e4a895439663bb0d0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  miniMalValueDir: {x: 0.1, y: 0.1}
+  speedMovement: 75
 --- !u!114 &963194231
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2234,7 +2249,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 98.6001, y: -30.899994}
+  m_AnchoredPosition: {x: 98.59961, y: -30.899994}
   m_SizeDelta: {x: 197.2, y: 61.8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1574159662
@@ -2461,6 +2476,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numberCube: 6
+  numberFaceVictory: 0
   numberRandomScramble: 10
 --- !u!4 &1706424639
 Transform:

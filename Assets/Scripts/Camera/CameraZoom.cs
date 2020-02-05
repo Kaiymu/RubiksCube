@@ -20,12 +20,20 @@ public class CameraZoom : MonoBehaviour
     }
 
     private void Update() {
-        float scrollOrMobileValue = InputManager.Instance.GetScrollOrMobileZoom();
+        if (GameManager.Instance.gameState == GameManager.GAME_STATE.WIN)
+            return;
+
+       float scrollOrMobileValue = InputManager.Instance.GetScrollOrMobileZoom();
 
         if (scrollOrMobileValue != 0f) {
             Vector3 zoomInOut = transform.position;
             // Set back the previous pos when trying to reach out the boundaries
-            zoomInOut = new Vector3(zoomInOut.x, zoomInOut.y, zoomInOut.z + (scrollOrMobileValue * zoomSpeed));
+            if (zoomInOut.z > 0)
+                zoomInOut.z -= (scrollOrMobileValue * zoomSpeed);
+            else
+                zoomInOut.z += (scrollOrMobileValue * zoomSpeed);
+
+            zoomInOut = new Vector3(zoomInOut.x, zoomInOut.y, zoomInOut.z);
 
             var distanceLookAt = Vector3.Distance(_lookAt.transform.position, zoomInOut);
 

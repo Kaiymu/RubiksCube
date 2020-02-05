@@ -42,6 +42,19 @@ public class InputManager : MonoBehaviour
 #endif
     }
 
+    public bool GetMouseOrTouchContinue()
+    {
+#if UNITY_STANDALONE || UNITY_EDITOR
+        return Input.GetMouseButton(0);
+#elif UNITY_ANDROID || UNITY_IPHONE
+        foreach (Touch touch in Input.touches)
+        {
+            return (touch.phase == TouchPhase.Moved);
+        }
+        return false;
+#endif
+    }
+
     public bool GetMouseOrTouchEnd() {
 #if UNITY_STANDALONE || UNITY_EDITOR
         return Input.GetMouseButtonUp(0);
@@ -77,4 +90,35 @@ public class InputManager : MonoBehaviour
         return zoomInOut;
     }
 #endif
+    private Vector3 startingPos = Vector3.zero;
+    public Vector2 _RotateMobile(Vector2 offset)
+    {
+        Vector2 rotationDir = Vector2.zero;
+
+        if (GetMouseOrTouchContinue())
+        {
+            rotationDir = startingPos - GetMouseTouchPosition();
+            startingPos = GetMouseTouchPosition();
+
+            var tempRotation = rotationDir;
+            rotationDir.x = tempRotation.y;
+            rotationDir.y = tempRotation.x * -1;
+
+            rotationDir.Normalize();
+
+            if (offset.x > Mathf.Abs(rotationDir.x))
+            {
+                rotationDir.x = 0;
+            }
+
+            if (offset.y > Mathf.Abs(rotationDir.y))
+            {
+                rotationDir.y = 0;
+            }
+
+            return rotationDir;
+        }
+
+        return rotationDir;
+    }
 }

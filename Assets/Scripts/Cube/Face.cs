@@ -25,25 +25,27 @@ public class Face : MonoBehaviour
 
             // Here's win condition, if the 6 faces returns true.
             if ((GameManager.Instance.numberCube * 2) == _faceCube.Count) {
-                //_CheckColorsFace
+                GameManager.Instance.CheckWin(_CheckForwardFace());
             }
         }
     }
 
-    private bool _CheckColorsFace()
+    private bool _CheckForwardFace()
     {
-        Vector3 tempColor = Vector3.zero;
+        Vector3 tempFwdValue = Vector3.zero;
 
         // Check if they all have the same forward.
         for (int i = 0; i < _faceCube.Count; i++)
         {
             var forwardCube = _faceCube[i].transform.forward;
-            if (tempColor == Vector3.zero)
+
+            // If the face have the cube all facing the same direction, it seems the face as the same color
+            if (tempFwdValue == Vector3.zero)
             {
-                tempColor = forwardCube;
+                tempFwdValue = forwardCube;
             }
 
-            if(tempColor != forwardCube)
+            if(tempFwdValue != forwardCube)
             {
                 Debug.Log("Face doesn't have the same colors, no victory");
                 return false;

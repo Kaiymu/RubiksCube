@@ -448,6 +448,8 @@ public class CubeManager : MonoBehaviour
                 rotationTime = rotationTimeScrambled;
             else if (GameManager.Instance.gameState == GameManager.GAME_STATE.PLAYING) {
                 rotationTime = rotationTimePlaying;
+                // Ressetting the number of rotation before doing one
+                GameManager.Instance.numberFaceVictory = 0;
             }
 
             LeanTween.rotateAround(parentTransform.gameObject, direction, _ROTATION_CUBE.x, rotationTime)

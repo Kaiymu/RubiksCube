@@ -28,6 +28,10 @@ public class GameManager : MonoBehaviour
     [Range(2, 6)]
     public int numberCube = 2;
 
+    private const int NUMBER_FACE_VICTORY = 6;
+    [HideInInspector]
+    public int numberFaceVictory = 0;
+
     [Header("Number of random direction and positive that the cubes will do before starting the game")]
     public int numberRandomScramble = 10;
 
@@ -52,11 +56,6 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(this);
 
         _CreateCenterOfCube();
-    }
-
-    private void Start()
-    {
-
     }
 
     // We register / unregister to OnSceneLoad event to load specific events
@@ -115,6 +114,17 @@ public class GameManager : MonoBehaviour
         _centerOfCube = new GameObject();
         _centerOfCube.name = "[CENTER OF CUBE]";
         _centerOfCube.transform.position = centerOfCubePos;
+    }
+
+    public void CheckWin (bool faceWin)
+    {
+        if(faceWin)
+            numberFaceVictory++;
+
+        if (NUMBER_FACE_VICTORY == numberFaceVictory)
+        {
+            _gameState = GAME_STATE.WIN;
+        }
     }
 
 }
